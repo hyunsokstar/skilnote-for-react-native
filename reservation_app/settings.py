@@ -11,7 +11,7 @@ SECRET_KEY = 'qki)d54cmpt_v7b5m07qh$d#o3j6#pm3gi=po&)b2a59$e859x'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['158.247.236.187','127.0.0.1', 'www.skilnote-for-react-native.co.kr', 'skilnote-for-react-native.co.kr']
+ALLOWED_HOSTS = ['158.247.236.187','127.0.0.1', 'www.skilnote-for-react-native.shop', 'skilnote-for-react-native.shop']
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Application definition
