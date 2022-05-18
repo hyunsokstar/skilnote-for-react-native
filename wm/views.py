@@ -19,7 +19,6 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # 11111111111111111111
-
 def category_plus_a_for_current_user(request):
     ca_num = request.POST['current_ca_num']
     page_plus_number = request.POST['page_plus_number']
