@@ -8,7 +8,11 @@ app_name = 'wm'
 urlpatterns = [
     # 1122
     # partial_move_for_my_note
-    
+     path('myshortcut/category_plus_a_for_current_user',
+         views.category_plus_a_for_current_user, name='category_plus_a_for_current_user'), 
+    path('myshortcut/category_minus_a_for_current_user',
+         views.category_minuus_a_for_current_user, name='category_minuus_a_for_current_user'),
+        
     path('myshortcut/partial_copy_for_skilnote', views.partial_copy_for_skilnote, name="partial_copy_for_skilnote"),
     path('myshortcut/partial_copy_for_skilnote_from_another_user', views.partial_copy_for_skilnote_from_another_user, name="partial_copy_for_skilnote_from_another_user"),    
     path('myshortcut/partial_move_for_my_note', views.partial_move_for_my_note, name="partial_move_for_my_note"),

@@ -10,6 +10,8 @@ urlpatterns = [
     path('my_task/new/',views.mytask_new , name ="mytask_new"),
     path('delete_mytask_by_ajax/',views.delete_mytask_by_ajax , name ="delete_mytask_by_ajax"),
     path('update_mytask_by_ajax/',views.update_mytask_by_ajax , name ="update_mytask_by_ajax"),
+    
+    
     #
     # path('add_mysite_by_ajax/',views.add_mysite_by_ajax , name ="add_mysite_by_ajax"),
     # path('update_mysite_by_ajax/',views.update_mysite_by_ajax , name ="update_mysite_by_ajax"),

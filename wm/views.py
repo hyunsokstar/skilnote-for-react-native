@@ -20,6 +20,101 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # 11111111111111111111
 
+def category_plus_a_for_current_user(request):
+    ca_num = request.POST['current_ca_num']
+    page_plus_number = request.POST['page_plus_number']
+
+    # 초기화
+    # data1 = {'ca{}'.format(x):"ca"+str(x) for x in range(int(ca_num), 121)}
+    # CategoryNick.objects.filter(author=request.user).update(**data1)
+
+    # 업데이트할 필드 : 업데이트할 값
+    for x in reversed(range(int(ca_num), 120)):
+        if (x+int(page_plus_number) <= 120):
+            update_field = 'ca{}'.format(str(x+int(page_plus_number)))
+            filed_for_copy = 'ca{}'.format(str(x))
+            print(update_field ,"from : ", filed_for_copy)
+            # 카테고리 타이틀 업데이트 from 120,  x+2 => x
+            CategoryNick.objects.filter(author=request.user).update( **{update_field : F(filed_for_copy)} )
+        else:
+            print("pass : ", int(ca_num))
+            continue
+    # 현재 카테고리에서 + 한만큼 초기화 (from 현재 카테고리 , x => x)
+    data2 = {'ca{}'.format(x): "ca"+str(x) for x in range(int(ca_num), int(ca_num)+int(page_plus_number))}
+    CategoryNick.objects.filter(author=request.user).update(**data2)        
+    
+    # 내가 쓴 노트 전체 조회
+    skil_note = MyShortCut.objects.filter(Q(author=request.user)).order_by("created")
+    ca_delete = Category.objects.get(name="ca120")
+    MyShortCut.objects.filter(Q(author=request.user) & Q(category=ca_delete)).delete()        
+    
+    # 내 노트 반복문 돌려서 카테고리 번호 +1 업데이트 하기
+    for sn in skil_note:
+        if(sn.category.id >= int(ca_num) and sn.category.id != 120 and int(sn.category.id)+int(page_plus_number) <= 120):
+            ca = Category.objects.get(id=int(sn.category.id)+int(page_plus_number))
+            # 하나 위의 카테고리를 가져와서 현재 노트 카테고리를 업데이트 카테고리를 +a한 id 의 카테고리로 업데이트 
+            MyShortCut.objects.filter(id=sn.id).update(category=ca, created=F('created'))
+        else:
+            print("sn.category.id : ", sn.category.id)    
+
+    return JsonResponse({
+        'message': "ca"+ca_num+"부터 ca119까지" +page_plus_number+ "성공"
+    })
+        
+    
+def category_minuus_a_for_current_user(request):
+    ca_num = request.POST['current_ca_num']
+    page_minus_number = request.POST['page_minus_number']
+    # print("category -a 실행 : ", page_minus_number)
+    # print("ca_num type :", type(ca_num))
+    # print("ca_num : ", ca_num)
+    # print("page_minus_number : ", page_minus_number)
+    
+    # 초기화 (테스트 초기화용)
+    # data1 = {'ca{}'.format(x): 'ca{}'.format(x) for x in range(int(ca_num), 121)}
+    # CategoryNick.objects.filter(author=request.user).update(**data1)
+
+    # 카테고리 타이틀 업데이트
+    # 업데이트할 필드 : 업데이트할 값
+    for x in range(int(ca_num) , 121):
+        field_for_copy = 'ca{}'.format(str(x))
+        update_field = 'ca{}'.format(int(x) - int(page_minus_number))
+        if (int(ca_num) - int(page_minus_number) > 0):
+            print(update_field ,"from : ", field_for_copy)            
+            ########### 11
+            CategoryNick.objects.filter(author=request.user).update( **{update_field : F(field_for_copy)} )
+        else: 
+            print("pass field: ", update_field )
+            continue            
+
+    # 내가 쓴 노트 전체 조회
+    skil_note = MyShortCut.objects.filter(Q(author=request.user)).order_by("created")
+    ###### 삭제할 필드 6 에서 -2 하면 54는 삭제 해야 됨 22
+    for sn in skil_note:        
+        if(sn.category.id >= int(ca_num) - int(page_minus_number) and sn.category.id != int(ca_num)):
+            print("삭제할 category num : ", sn.category.id)
+            ########### 22
+            ca_delete_result  = MyShortCut.objects.filter(Q(author=request.user) & Q(category=sn.category.id)).delete()
+
+        if(sn.category.id >= int(ca_num) and sn.category.id != 120 and int(sn.category.id) - int(page_minus_number) > 0):
+            ca = Category.objects.get(id=int(sn.category.id)-int(page_minus_number))
+            
+            # 현재 ca 부터 120까지 번호 - x
+            print("from :  " ,sn.category.id , " to :", ca.id)
+            
+            ########### 33
+            MyShortCut.objects.filter(id=sn.id).update(category=ca, created=F('created'))
+            
+        # else:
+        #     print("int(sn.category.id) - int(page_minus_number) : ", int(sn.category.id) - int(page_minus_number))
+            # print("sn.category.id : ", sn.category.id)        
+            
+    return JsonResponse({
+        'message': "ca"+ca_num+"부터 ca119까지 -a : " +page_minus_number+  "성공 !!"
+    })
+
+
+
 def partial_copy_for_skilnote_from_another_user(request):
     # print("hi")
     partial_copy_option = request.POST['partial_copy_option']
