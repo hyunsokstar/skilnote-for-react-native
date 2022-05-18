@@ -852,7 +852,6 @@ $(function() {
 });
 
 // 1111111111111111
-
 $('body').on('click', '.page_plus_a_button', function (e) {
     e.preventDefault();
     console.log("page_plus_a_button 클릭!");
@@ -893,7 +892,52 @@ $('body').on('click', '.page_plus_a_button', function (e) {
 });
 
 
+
 $('body').on('click', '.page_minus_a_button', function (e) {
+    e.preventDefault();
+    console.log("page_plus_a_button 클릭!");
+    const ca_num = $("#current_category").text();
+    console.log("ca_num : ", ca_num);
+    const afterStr = ca_num.split('a');
+    const current_ca_num = afterStr[1];
+    // alert("current_ca_num : " +current_ca_num);
+    
+    const page_minus_number = $(this).parent().find(".page_minus_number").val();
+
+    if(page_minus_number >= 1 && page_minus_number <= 20) {
+        // alert("ok")
+        alert("page_minus_number : " +page_minus_number);
+    }else {
+        alert("page_minus_number count 는 1~20 이어야 합니다.")
+        return;
+    }
+    option1 = confirm(`${current_ca_num} 부터 120까지 카테고리를 +${page_minus_number}씩 당기시겠습니까? "`)
+
+    if(option1){
+        // loading_for_page_plus_a
+        $("#loading_for_page_plus_a").addClass("spinner-border spinner-border-sm");
+        // category_plus_1_for_current_user to category_plus_a_for_current_user
+        $.ajax({
+            type: "POST",
+            url: '/wm/myshortcut/category_minus_a_for_current_user',
+            data: {
+                'current_ca_num': current_ca_num,
+                'page_minus_number': page_minus_number,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function (result) {
+                $("#loading_for_page_plus_a").removeClass("spinner-border spinner-border-sm");
+                alert("result : "+ result.message);
+                // window.history.pushState("", "", '/wm/myshortcut/')
+                // location.reload(true);
+            }
+        });
+    }else{
+        $("#loading_for_page_plus_a").removeClass("spinner-border spinner-border-sm");
+        
+        alert(`페이지 밀기 +${page_plus_number} 를 취소`)
+    }
+});
 
 
 // partial_move_btn_for_user
