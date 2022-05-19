@@ -187,11 +187,11 @@
         <td>
           {% if u.username != request.user.username %}
           멤버 ( 총 {{u.allowlistforskilnote_set.count}} 명 )
-          <button data-username="{{u.username}}" class="btn btn-sm btn-outline-dark showAllowListButton">참여 </button>
+          <!-- <button data-username="{{u.username}}" class="btn btn-sm btn-outline-dark showAllowListButton">참여 </button>
   
           <button class="btn btn-sm btn-outline-dark">
             <a href="http://www.skilnote-for-react-native.shop/wm/myshortcut/{{u.username}}/1">도전 과제</a>
-          </button>
+          </button> -->
   
           {% elif u.username == request.user.username %}
           멤버 ( 총 {{u.allowlistforskilnote_set.count}} 명 )
