@@ -32,187 +32,198 @@
     background-color: azure;
   }
 
+  .common_subject_list_area{
+    display: flex;
+    gap: 20px
+  }
 
 </style>
 
 <br><br>
 
+<h2>subject_list</h2>
+
+<div class="common_subject_list_area"></div>
+
 <h2>참가자 목록</h2>
-<div class="table-responsive">
-  
-  <table class="">
-    <tr style="background-color: #edf3fa">
-      <td>user</td>
-      <td>lecture/git</td>
-      <td>chapter</td>
-      <td>git1</td>
-      <td>git2</td>
-      <td>git3</td>
-      <td>git4</td>
-      <td>created / updated</td>
-      <td>최근 진도</td>
-      <td>조회수</td>
-    </tr>
 
-    {% if user_list.exists %} {% for u in user_list %}
-    <tr class={% if u.username == request.user.username %} {{"login_user_row"}} {% endif %}>
-      <td id="user_name_{{u.id}}">
-        <a href="http://www.skilnote-for-react-native.shop/wm/myshortcut/{{u.username}}/1" title="{{u.profile.phone}}">
-          {{u.username}}
-
-
-            &nbsp;
-            <a href="" class="btn btn-outline-success btn-sm" data-id="{{u.id}}" id="{{u.username}}">
-              북마크
-            </a>
-            <a href="" class="btn btn-outline-success btn-sm" data-id="{{u.id}}" id="{{u.username}}">
-              북마크
-            </a>
+<div class="user_list_area">
+  <div class="table-responsive">
     
-
-        </a>
-        
-      </td>
-
-      <td>
-        {% if u.profile.lecture_url %}
-        <a class="btn btn-outline-dark btn-sm" href="http://{{u.profile.lecture_url}}">
-          <img src="{% static 'icon/home_page.png' %}" width="%" alt="" />
-        </a>
-        {% elif not u.profile.lecture_url %}
-        <a class="btn btn-outline-dark btn-sm" href="http://{{u.profile.github_original}}">
-          <img src="{% static 'icon/home_page_empty.png' %}" width="%" alt="" />
-        </a>
-        {% endif %} 
-
-        {% if u.profile.github_original %}
-        <a class="btn btn-outline-dark btn-sm" href="http://{{u.profile.github_original}}">
-          <img src="{% static 'icon/github_original.png' %}" width="%" alt="" />
-        </a>
-        {% elif not u.profile.github_original %}
-        <a href="" class="btn btn-outline-dark btn-sm" data-id="{{u.id}}" id="{{u.username}}">
-          <img src="{% static 'icon/github_empty.png' %}" width="%" alt="" />
-        </a>
-
-
-        {% endif %}
-
-
-      </td>
-
-      <td>
-        ({{ u.profile.first_category }} ~ {{ u.profile.last_category }})
-        <button type="button" class="btn btn-sm btn-outline-dark category_name_list_icon"
-          data-username="{{u.username}}">
-          목록
-        </button>
-        <!-- <button class="btn btn-sm btn-outline-dark"> -->
-          <!-- <a href="http://www.skilnote-for-react-native.shop/wm/myshortcut/{{u.username}}/119">결과1</a>
-        </button>
-        <button class="btn btn-sm btn-outline-dark">
-          <a href="http://www.ts.co.kr/wm/myshortcut/{{u.username}}/120">결과2</a>
-        </button> -->
-      </td>
-
-      <td>
-        {% if u.profile.github1 %}
-        <a href="http://{{u.profile.github1}}">
-          <img src="{% static 'icon/github.png' %}" width="%" alt="" />
-        </a>
-        {% elif not u.profile.github1 %}
-        <img src="{% static 'icon/github_empty.png' %}" width="%" alt="" />
-
-        {% endif %}
-      </td>
-
-      <td>
-        {% if u.profile.github2 %}
-        <a href="http://{{u.profile.github2}}">
-          <img src="{% static 'icon/github.png' %}" width="%" alt="" />
-        </a>
-        {% elif not u.profile.github2 %}
-        <img src="{% static 'icon/github_empty.png' %}" width="%" alt="" />
-        {% endif %}
-      </td>
-
-      <td>
-        {% if u.profile.github3 %}
-        <a href="http://{{u.profile.github3}}">
-          <img src="{% static 'icon/github.png' %}" width="%" alt="" />
-        </a>
-        {% elif not u.profile.github3 %}
-        <img src="{% static 'icon/github_empty.png' %}" width="%" alt="" />
-        {% endif %}
-      </td>
-
-      <td>
-        {% if u.profile.github4 %}
-        <a href="http://{{u.profile.github4}}">
-          <img src="{% static 'icon/github.png' %}" width="%" alt="" />
-        </a>
-        {% elif not u.profile.github4 %}
-        <img src="{% static 'icon/github_empty.png' %}" width="%" alt="" />
-        {% endif %}
-      </td>
-
-      <td>
-        {{u.profile.last_updated}} / <br />
-        {{u.profile.last_modified}}
-      </td>
-
-      <td>
-        <a
-          href="http://www.skilnote-for-react-native.shop/wm/myshortcut/{{u.username}}/{{ u.profile.last_updated_category }}">ca{{u.profile.last_updated_category}}</a>
-      </td>
-
-      {% if u.username == request.user.username %} {% else %} {% endif %}
-
-      <td>{{u.profile.click_count}}</td>
-
+    <table class="">
+      <tr style="background-color: #edf3fa">
+        <td>user</td>
+        <td>lecture/git</td>
+        <td>chapter</td>
+        <td>git1</td>
+        <td>git2</td>
+        <td>git3</td>
+        <td>git4</td>
+        <td>created / updated</td>
+        <td>최근 진도</td>
+        <td>조회수</td>
+      </tr>
+  
+      {% if user_list.exists %} {% for u in user_list %}
+      <tr class={% if u.username == request.user.username %} {{"login_user_row"}} {% endif %}>
+        <td id="user_name_{{u.id}}">
+          <a href="http://www.skilnote-for-react-native.shop/wm/myshortcut/{{u.username}}/1" title="{{u.profile.phone}}">
+            {{u.username}}
+  
+  
+              &nbsp;
+              <a href="" class="btn btn-outline-warning btn-sm lecture_list_for_user_button" data-user-id="{{u.username}}" id="{{u.username}}">
+                참고
+              </a>
+              <a href="" class="btn btn-outline-warning btn-sm copy_for_username" data-user-id="{{u.username}}" id="{{u.username}}">
+                copy
+              </a>
       
-
-    </tr>
-    <tr>
-
-      <td>
-        {% if u.username != request.user.username %}
-        멤버 ( 총 {{u.allowlistforskilnote_set.count}} 명 )
-        <button data-username="{{u.username}}" class="btn btn-sm btn-outline-dark showAllowListButton">참여 </button>
-
-        <button class="btn btn-sm btn-outline-dark">
-          <a href="http://www.skilnote-for-react-native.shop/wm/myshortcut/{{u.username}}/1">도전 과제</a>
-        </button>
-
-        {% elif u.username == request.user.username %}
-        멤버 ( 총 {{u.allowlistforskilnote_set.count}} 명 )
-        <button data-username="{{u.username}}" class="">me</button>
-        {% endif %}
-      </td>
-      <td colspan="9">
-        {%if u.allowlistforskilnote_set.exists %}
-          {% for a in u.allowlistforskilnote_set.all %}
-
-            <a href="http://www.skilnote-for-react-native.shop/wm/myshortcut/{{a.member}}/1" title="{{u.profile.phone}}" style="color:blue">
-              {{a.member}} &nbsp;
-            </a>
-
-          {% endfor %}
-        {% endif %}
-
-      </td>
-    </tr>
-
-    {% endfor %} {% else %}
-
-    <tr>
-      <td colspan="4">
-        <h4>아직 게시물이 없습니다.</h4>
-      </td>
-    </tr>
-
-    {% endif %}
-  </table>
-
+  
+          </a>
+          
+        </td>
+  
+        <td>
+          {% if u.profile.lecture_url %}
+          <a class="btn btn-outline-dark btn-sm" href="http://{{u.profile.lecture_url}}">
+            <img src="{% static 'icon/home_page.png' %}" width="%" alt="" />
+          </a>
+          {% elif not u.profile.lecture_url %}
+          <a class="btn btn-outline-dark btn-sm" href="http://{{u.profile.github_original}}">
+            <img src="{% static 'icon/home_page_empty.png' %}" width="%" alt="" />
+          </a>
+          {% endif %} 
+  
+          {% if u.profile.github_original %}
+          <a class="btn btn-outline-dark btn-sm" href="http://{{u.profile.github_original}}">
+            <img src="{% static 'icon/github_original.png' %}" width="%" alt="" />
+          </a>
+          {% elif not u.profile.github_original %}
+          <a href="" class="btn btn-outline-dark btn-sm" data-id="{{u.id}}" id="{{u.username}}">
+            <img src="{% static 'icon/github_empty.png' %}" width="%" alt="" />
+          </a>
+  
+  
+          {% endif %}
+  
+  
+        </td>
+  
+        <td>
+          ({{ u.profile.first_category }} ~ {{ u.profile.last_category }})
+          <button type="button" class="btn btn-sm btn-outline-dark category_name_list_icon"
+            data-username="{{u.username}}">
+            목록
+          </button>
+          <!-- <button class="btn btn-sm btn-outline-dark"> -->
+            <!-- <a href="http://www.skilnote-for-react-native.shop/wm/myshortcut/{{u.username}}/119">결과1</a>
+          </button>
+          <button class="btn btn-sm btn-outline-dark">
+            <a href="http://www.ts.co.kr/wm/myshortcut/{{u.username}}/120">결과2</a>
+          </button> -->
+        </td>
+  
+        <td>
+          {% if u.profile.github1 %}
+          <a href="http://{{u.profile.github1}}">
+            <img src="{% static 'icon/github.png' %}" width="%" alt="" />
+          </a>
+          {% elif not u.profile.github1 %}
+          <img src="{% static 'icon/github_empty.png' %}" width="%" alt="" />
+  
+          {% endif %}
+        </td>
+  
+        <td>
+          {% if u.profile.github2 %}
+          <a href="http://{{u.profile.github2}}">
+            <img src="{% static 'icon/github.png' %}" width="%" alt="" />
+          </a>
+          {% elif not u.profile.github2 %}
+          <img src="{% static 'icon/github_empty.png' %}" width="%" alt="" />
+          {% endif %}
+        </td>
+  
+        <td>
+          {% if u.profile.github3 %}
+          <a href="http://{{u.profile.github3}}">
+            <img src="{% static 'icon/github.png' %}" width="%" alt="" />
+          </a>
+          {% elif not u.profile.github3 %}
+          <img src="{% static 'icon/github_empty.png' %}" width="%" alt="" />
+          {% endif %}
+        </td>
+  
+        <td>
+          {% if u.profile.github4 %}
+          <a href="http://{{u.profile.github4}}">
+            <img src="{% static 'icon/github.png' %}" width="%" alt="" />
+          </a>
+          {% elif not u.profile.github4 %}
+          <img src="{% static 'icon/github_empty.png' %}" width="%" alt="" />
+          {% endif %}
+        </td>
+  
+        <td>
+          {{u.profile.last_updated}} / <br />
+          {{u.profile.last_modified}}
+        </td>
+  
+        <td>
+          <a
+            href="http://www.skilnote-for-react-native.shop/wm/myshortcut/{{u.username}}/{{ u.profile.last_updated_category }}">ca{{u.profile.last_updated_category}}</a>
+        </td>
+  
+        {% if u.username == request.user.username %} {% else %} {% endif %}
+  
+        <td>{{u.profile.click_count}}</td>
+  
+        
+  
+      </tr>
+      <tr>
+  
+        <td>
+          {% if u.username != request.user.username %}
+          멤버 ( 총 {{u.allowlistforskilnote_set.count}} 명 )
+          <button data-username="{{u.username}}" class="btn btn-sm btn-outline-dark showAllowListButton">참여 </button>
+  
+          <button class="btn btn-sm btn-outline-dark">
+            <a href="http://www.skilnote-for-react-native.shop/wm/myshortcut/{{u.username}}/1">도전 과제</a>
+          </button>
+  
+          {% elif u.username == request.user.username %}
+          멤버 ( 총 {{u.allowlistforskilnote_set.count}} 명 )
+          <button data-username="{{u.username}}" class="">me</button>
+          {% endif %}
+        </td>
+        <td colspan="9">
+          {%if u.allowlistforskilnote_set.exists %}
+            {% for a in u.allowlistforskilnote_set.all %}
+  
+              <a href="http://www.skilnote-for-react-native.shop/wm/myshortcut/{{a.member}}/1" title="{{u.profile.phone}}" style="color:blue">
+                {{a.member}} &nbsp;
+              </a>
+  
+            {% endfor %}
+          {% endif %}
+  
+        </td>
+      </tr>
+  
+      {% endfor %} {% else %}
+  
+      <tr>
+        <td colspan="4">
+          <h4>아직 게시물이 없습니다.</h4>
+        </td>
+      </tr>
+  
+      {% endif %}
+    </table>
+  
+  </div>
 </div>
 
 
@@ -307,7 +318,68 @@
   {%block extra_js %}
 
   // 2244
+
+  $(document).ready(function () {
+    const url = "/wm/myshortcut/common_subject_list"
+    $.get(url)
+      .done((result) => {
+        console.log("result : ", result);
+        $(".common_subject_list_area").html(result)
+      })
+      .fail(() => {
+        console.log("fail");
+      })
+      .always(() => {
+        console.log('always');
+      })
+  });
+
   // showAllowListButton
+
+  function copyToClipboard(text) {
+        var dummy = document.createElement("textarea");
+        // to avoid breaking orgain page when copying more words
+        // cant copy when adding below this code
+        // dummy.style.display = 'none'
+        document.body.appendChild(dummy);
+        //Be careful if you use texarea. setAttribute('value', value), which works with "input" does not work with "textarea". – Eduard
+        dummy.value = text;
+        dummy.select();
+        document.execCommand("copy");
+        document.body.removeChild(dummy);
+    }
+
+    $(".copy_for_username").click(function (e) {
+        const user_name = $(this).data("user-id"); 
+        // alert("page url copy "+ page_url)
+        copyToClipboard(user_name);
+        alert("copy user_name success !! : "+ user_name)
+    })
+
+
+
+  $('body').on('click', '.lecture_list_for_user_button', function (e) {
+    e.preventDefault();
+
+    const userId = $(this).data("user-id");
+    // alert("userId : "+ userId)
+    const url = "/wm/myshortcut/lecture_list_for_user/"+userId
+
+      $.get(url)
+      .done((result) => {
+        $("#guest_list_table_area").html(result)
+        $("#guest_book_list_modal").modal();
+
+        window.history.pushState("", "", '/wm/myshortcut')
+        // // $(".navbar").hide();
+      })
+      .fail(() => {
+        console.log("fail");
+      })
+      .always(() => {
+        console.log('always');
+    })
+  });
 
   $('body').on('click', '.showAllowListButton', function (e) {
     const username = $(this).data("username");

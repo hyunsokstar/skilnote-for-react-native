@@ -594,10 +594,15 @@ def insert_for_lecture_list(request):
     })
 
 
-def lecture_list_for_user(request):
+def lecture_list_for_user(request, note_user):
     if request.method == 'GET':
         print("geust_book_list 실행")
-        owner = User.objects.get(username=request.user.username)
+        
+        if(note_user):
+            owner = User.objects.get(username=note_user)
+        else:
+            owner = User.objects.get(username=request.user.username)
+            
         object_list = LectureBookMark.objects.filter(author=owner).order_by('created_at')
         print("object_list : ", object_list)
 

@@ -83,7 +83,7 @@ urlpatterns = [
     #     path('myshortcut/guest_book_list/<str:guest_book_owner>',
     #          views.guest_book_list, name="guest_book_list"),  # guest_book_list
 
-    path('myshortcut/lecture_list_for_user',
+    path('myshortcut/lecture_list_for_user/<str:note_user>',
          views.lecture_list_for_user, name="lecture_list_for_user"),  # lecture_list
 
     # lecture 관련
