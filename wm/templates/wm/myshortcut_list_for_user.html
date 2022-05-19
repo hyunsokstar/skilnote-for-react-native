@@ -138,6 +138,7 @@ height: auto !important;
 		id="">m2</button><br>
 
 	<button type="button" class="btn btn-sm btn-outline-dark guest_book_list_btn">계획</button> <br>
+	<button type="button" class="btn btn-sm btn-outline-dark copy_for_page_url">링크 복사</button> <br>
 
 	<!-- 1122 -->
 
@@ -1095,6 +1096,28 @@ height: auto !important;
 			});
 		};
 	})(jQuery);
+
+	// copy_for_page_url
+
+	function copyToClipboard(text) {
+		var dummy = document.createElement("textarea");
+		// to avoid breaking orgain page when copying more words
+		// cant copy when adding below this code
+		// dummy.style.display = 'none'
+		document.body.appendChild(dummy);
+		//Be careful if you use texarea. setAttribute('value', value), which works with "input" does not work with "textarea". – Eduard
+		dummy.value = text;
+		dummy.select();
+		document.execCommand("copy");
+		document.body.removeChild(dummy);
+	}
+
+    $(".copy_for_page_url").click(function (e) {
+		const page_url = window.location.href; 
+		// alert("page url copy "+ page_url)
+		copyToClipboard(page_url);
+		alert("current pag url copy success !! : "+ page_url)
+	})
 
 	// js area 1122
     $(".copy_chapter_to_x").click(function (e) {
