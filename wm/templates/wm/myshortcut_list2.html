@@ -914,6 +914,7 @@ $('body').on('click', '.page_minus_a_button', function (e) {
         
     } else {
         alert("1 이하로 이동 할수 없습니다")
+		return;
     }
 
     if(page_minus_number >= 1 && page_minus_number <= 20) {
