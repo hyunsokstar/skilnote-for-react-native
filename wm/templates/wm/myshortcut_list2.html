@@ -861,11 +861,11 @@ $('body').on('click', '.page_plus_a_button', function (e) {
     const current_ca_num = afterStr[1];
     const page_plus_number = $(this).parent().find(".page_plus_number").val();
 
-	if(current_ca_num + page_plus_number < 120 ){
-	} else {
-		alert("120 이상으로 밀수 없습니다.")
-		return;
-	}
+    if(current_ca_num + page_plus_number < 120 ){
+    } else {
+        alert("120 이상으로 밀수 없습니다.")
+        return;
+    }
 
     if(page_plus_number >= 1 && page_plus_number <= 20) {
         alert("page_plus_number : " +page_plus_number);
@@ -910,11 +910,11 @@ $('body').on('click', '.page_minus_a_button', function (e) {
     
     const page_minus_number = $(this).parent().find(".page_minus_number").val();
 
-	if(current_ca_num - page_minus_number > 0 ){
-		
-	} else {
-		alert("1 이하로 이동 할수 없습니다")
-	}
+    if(current_ca_num - page_minus_number > 0 ){
+        
+    } else {
+        alert("1 이하로 이동 할수 없습니다")
+    }
 
     if(page_minus_number >= 1 && page_minus_number <= 20) {
         // alert("ok")
@@ -950,6 +950,8 @@ $('body').on('click', '.page_minus_a_button', function (e) {
         alert(`페이지 밀기 +${page_plus_number} 를 취소`)
     }
 });
+
+
 
 
 // partial_move_btn_for_user

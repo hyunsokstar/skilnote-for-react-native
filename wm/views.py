@@ -14,9 +14,10 @@ from django.http import HttpResponseRedirect
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.urls import reverse_lazy
-from . forms import CommentForm
+from .forms import CommentForm
 from django.utils.datastructures import MultiValueDictKeyError
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 # 11111111111111111111
 def category_plus_a_for_current_user(request):
@@ -29,38 +30,47 @@ def category_plus_a_for_current_user(request):
 
     # 업데이트할 필드 : 업데이트할 값
     for x in reversed(range(int(ca_num), 120)):
-        if (x+int(page_plus_number) <= 120):
-            update_field = 'ca{}'.format(str(x+int(page_plus_number)))
+        if (x + int(page_plus_number) <= 120):
+            update_field = 'ca{}'.format(str(x + int(page_plus_number)))
             filed_for_copy = 'ca{}'.format(str(x))
-            print(update_field ,"from : ", filed_for_copy)
+            print(update_field, "from : ", filed_for_copy)
             # 카테고리 타이틀 업데이트 from 120,  x+2 => x
-            CategoryNick.objects.filter(author=request.user).update( **{update_field : F(filed_for_copy)} )
+            CategoryNick.objects.filter(author=request.user).update(
+                **{update_field: F(filed_for_copy)})
         else:
             print("pass : ", int(ca_num))
             continue
     # 현재 카테고리에서 + 한만큼 초기화 (from 현재 카테고리 , x => x)
-    data2 = {'ca{}'.format(x): "ca"+str(x) for x in range(int(ca_num), int(ca_num)+int(page_plus_number))}
-    CategoryNick.objects.filter(author=request.user).update(**data2)        
-    
+    data2 = {
+        'ca{}'.format(x): "ca" + str(x)
+        for x in range(int(ca_num),
+                       int(ca_num) + int(page_plus_number))
+    }
+    CategoryNick.objects.filter(author=request.user).update(**data2)
+
     # 내가 쓴 노트 전체 조회
-    skil_note = MyShortCut.objects.filter(Q(author=request.user)).order_by("created")
+    skil_note = MyShortCut.objects.filter(
+        Q(author=request.user)).order_by("created")
     ca_delete = Category.objects.get(name="ca120")
-    MyShortCut.objects.filter(Q(author=request.user) & Q(category=ca_delete)).delete()        
-    
+    MyShortCut.objects.filter(Q(author=request.user)
+                              & Q(category=ca_delete)).delete()
+
     # 내 노트 반복문 돌려서 카테고리 번호 +1 업데이트 하기
     for sn in skil_note:
-        if(sn.category.id >= int(ca_num) and sn.category.id != 120 and int(sn.category.id)+int(page_plus_number) <= 120):
-            ca = Category.objects.get(id=int(sn.category.id)+int(page_plus_number))
-            # 하나 위의 카테고리를 가져와서 현재 노트 카테고리를 업데이트 카테고리를 +a한 id 의 카테고리로 업데이트 
-            MyShortCut.objects.filter(id=sn.id).update(category=ca, created=F('created'))
+        if (sn.category.id >= int(ca_num) and sn.category.id != 120
+                and int(sn.category.id) + int(page_plus_number) <= 120):
+            ca = Category.objects.get(id=int(sn.category.id) +
+                                      int(page_plus_number))
+            # 하나 위의 카테고리를 가져와서 현재 노트 카테고리를 업데이트 카테고리를 +a한 id 의 카테고리로 업데이트
+            MyShortCut.objects.filter(id=sn.id).update(category=ca,
+                                                       created=F('created'))
         else:
-            print("sn.category.id : ", sn.category.id)    
+            print("sn.category.id : ", sn.category.id)
 
-    return JsonResponse({
-        'message': "ca"+ca_num+"부터 ca119까지" +page_plus_number+ "성공"
-    })
-        
-    
+    return JsonResponse(
+        {'message': "ca" + ca_num + "부터 ca119까지" + page_plus_number + "성공"})
+
+
 def category_minuus_a_for_current_user(request):
     ca_num = request.POST['current_ca_num']
     page_minus_number = request.POST['page_minus_number']
@@ -68,50 +78,57 @@ def category_minuus_a_for_current_user(request):
     # print("ca_num type :", type(ca_num))
     # print("ca_num : ", ca_num)
     # print("page_minus_number : ", page_minus_number)
-    
+
     # 초기화 (테스트 초기화용)
     # data1 = {'ca{}'.format(x): 'ca{}'.format(x) for x in range(int(ca_num), 121)}
     # CategoryNick.objects.filter(author=request.user).update(**data1)
 
     # 카테고리 타이틀 업데이트
     # 업데이트할 필드 : 업데이트할 값
-    for x in range(int(ca_num) , 121):
+    for x in range(int(ca_num), 121):
         field_for_copy = 'ca{}'.format(str(x))
         update_field = 'ca{}'.format(int(x) - int(page_minus_number))
         if (int(ca_num) - int(page_minus_number) > 0):
-            print(update_field ,"from : ", field_for_copy)            
+            print(update_field, "from : ", field_for_copy)
             ########### 11
-            CategoryNick.objects.filter(author=request.user).update( **{update_field : F(field_for_copy)} )
-        else: 
-            print("pass field: ", update_field )
-            continue            
+            CategoryNick.objects.filter(author=request.user).update(
+                **{update_field: F(field_for_copy)})
+        else:
+            print("pass field: ", update_field)
+            continue
 
     # 내가 쓴 노트 전체 조회
-    skil_note = MyShortCut.objects.filter(Q(author=request.user)).order_by("created")
+    skil_note = MyShortCut.objects.filter(
+        Q(author=request.user)).order_by("created")
     ###### 삭제할 필드 6 에서 -2 하면 54는 삭제 해야 됨 22
-    for sn in skil_note:        
-        if(sn.category.id >= int(ca_num) - int(page_minus_number) and sn.category.id != int(ca_num)):
+    for sn in skil_note:
+        if (sn.category.id >= int(ca_num) - int(page_minus_number)
+                and sn.category.id != int(ca_num)):
             print("삭제할 category num : ", sn.category.id)
             ########### 22
-            ca_delete_result  = MyShortCut.objects.filter(Q(author=request.user) & Q(category=sn.category.id)).delete()
+            ca_delete_result = MyShortCut.objects.filter(
+                Q(author=request.user) & Q(category=sn.category.id)).delete()
 
-        if(sn.category.id >= int(ca_num) and sn.category.id != 120 and int(sn.category.id) - int(page_minus_number) > 0):
-            ca = Category.objects.get(id=int(sn.category.id)-int(page_minus_number))
-            
+        if (sn.category.id >= int(ca_num) and sn.category.id != 120
+                and int(sn.category.id) - int(page_minus_number) > 0):
+            ca = Category.objects.get(id=int(sn.category.id) -
+                                      int(page_minus_number))
+
             # 현재 ca 부터 120까지 번호 - x
-            print("from :  " ,sn.category.id , " to :", ca.id)
-            
+            print("from :  ", sn.category.id, " to :", ca.id)
+
             ########### 33
-            MyShortCut.objects.filter(id=sn.id).update(category=ca, created=F('created'))
-            
+            MyShortCut.objects.filter(id=sn.id).update(category=ca,
+                                                       created=F('created'))
+
         # else:
         #     print("int(sn.category.id) - int(page_minus_number) : ", int(sn.category.id) - int(page_minus_number))
-            # print("sn.category.id : ", sn.category.id)        
-            
-    return JsonResponse({
-        'message': "ca"+ca_num+"부터 ca119까지 -a : " +page_minus_number+  "성공 !!"
-    })
+        # print("sn.category.id : ", sn.category.id)
 
+    return JsonResponse({
+        'message':
+        "ca" + ca_num + "부터 ca119까지 -a : " + page_minus_number + "성공 !!"
+    })
 
 
 def partial_copy_for_skilnote_from_another_user(request):
@@ -122,43 +139,46 @@ def partial_copy_for_skilnote_from_another_user(request):
     user_start = request.POST['user_start']
     user_end = request.POST['user_end']
     writer_name = request.POST['writer_name'].strip()
-    
+
     print("writer_name : ", writer_name)
 
     user_count = User.objects.filter(username=writer_name).count()
-    if(user_count != 0):
+    if (user_count != 0):
         note_ower_obj = User.objects.get(username=writer_name)
         print("note_ower_obj : ", note_ower_obj)
     else:
         return JsonResponse({
             'message': "아이디가 존재하지 않습니다.",
-            })        
-        
-    if(partial_copy_option == "replace" and writer_name != request.user.username):
+        })
+
+    if (partial_copy_option == "replace"
+            and writer_name != request.user.username):
         if (MyShortCut.objects.filter(Q(author=request.user)).count() != 0):
             MyShortCut.objects.filter(Q(author=request.user)).delete()
             # CategoryNick.objects.filter(Q(author=request.user)).delete()
             CommentForShortCut.objects.filter(Q(author=request.user)).delete()
-    elif(partial_copy_option =="add"):
+    elif (partial_copy_option == "add"):
         print("노트 부분 복사 실행")
     else:
         return JsonResponse({
             'message': "본인의 노트는 replace 할수 없습니다.",
-            })                 
-
+        })
 
     print("partial rang : ", writer_start, writer_end, user_start, user_end)
 
-    writer_array = [i for i in range(int(writer_start), int(writer_end) + 1)]    
+    writer_array = [i for i in range(int(writer_start), int(writer_end) + 1)]
     user_array = [i for i in range(int(user_start), int(user_end) + 1)]
-    
+
     min_writer_ca_num = int(writer_array[0])
     min_user_ca_num = int(user_array[0])
     distance = min_writer_ca_num - min_user_ca_num
-    
+
     # distance = int(writer_array[0]) - int(user_array[0])
-    ca_array = ["ca"+str(i) for i in range(int(writer_start), int(writer_end) + 1)]
-    
+    ca_array = [
+        "ca" + str(i) for i in range(int(writer_start),
+                                     int(writer_end) + 1)
+    ]
+
     print("writer_array : ", writer_array)
     print("user_array : ", user_array)
     print("writer_name : ", writer_name)
@@ -168,25 +188,30 @@ def partial_copy_for_skilnote_from_another_user(request):
 
     category_list_obj = CategoryNick.objects.filter(Q(author=note_ower_obj))
     print("category_list_obj : ", category_list_obj)
-    
-    for ca in ca_array:   
+
+    for ca in ca_array:
         ca_obj = CategoryNick.objects.get(Q(author=note_ower_obj))
-        category_title = getattr(ca_obj, ca)                       
+        category_title = getattr(ca_obj, ca)
         print("category_title : ", category_title)
-        print("count : ", CategoryNick.objects.filter(Q(author=request.user)).count())
-        
+        print("count : ",
+              CategoryNick.objects.filter(Q(author=request.user)).count())
+
         original_ca_num = int(ca[2:5])
         # print("writer_note_obj : ", writer_note_obj)
         # print("check !!!!!!!!!!!! : " , note.category.slug[2:5])
         print("distance ::::::::::::::::::::::::: ", distance)
-        
-        ca_for_update1 = "ca"+str(original_ca_num)  
-        ca_for_update = "ca"+str(original_ca_num -  distance)  
-        
-        print("ca_for_update 5555555555555555555555555 ", ca_for_update)    
 
-        result_for_ca_update1 = CategoryNick.objects.filter(Q(author=request.user.id)).update(**{ca_for_update1: ca_for_update1})        
-        result_for_ca_update2 = CategoryNick.objects.filter(Q(author=request.user.id)).update(**{ca_for_update: category_title})        
+        ca_for_update1 = "ca" + str(original_ca_num)
+        ca_for_update = "ca" + str(original_ca_num - distance)
+
+        print("ca_for_update 5555555555555555555555555 ", ca_for_update)
+
+        result_for_ca_update1 = CategoryNick.objects.filter(
+            Q(author=request.user.id)).update(
+                **{ca_for_update1: ca_for_update1})
+        result_for_ca_update2 = CategoryNick.objects.filter(
+            Q(author=request.user.id)).update(
+                **{ca_for_update: category_title})
         print("result_for_ca_update2 : ", result_for_ca_update2)
 
     writer_comment_list_obj = CommentForShortCut.objects.filter(
@@ -195,23 +220,25 @@ def partial_copy_for_skilnote_from_another_user(request):
 
     for ca_id in writer_array:
         print(ca_id)
-        writer_note_obj = MyShortCut.objects.filter(category=ca_id, author=note_ower_obj).order_by('created')
+        writer_note_obj = MyShortCut.objects.filter(
+            category=ca_id, author=note_ower_obj).order_by('created')
 
         # [1,2] => [3,4]
         # [3,4] => [1,2]
         for note in writer_note_obj:
             original_ca_num = int(note.category.slug[2:5])
             print("writer_note_obj : ", writer_note_obj)
-            print("check !!!!!!!!!!!! : " , note.category.slug[2:5])
+            print("check !!!!!!!!!!!! : ", note.category.slug[2:5])
             print("distance ::::::::::::::::::::::::: ", distance)
-            ca_number_for_update = original_ca_num -  distance
-            ca_obj_for_create = Category.objects.get(slug="ca"+str(ca_number_for_update)) # 차이만큼 빼준 category 를 적용
-            # if(distance > 0 ):  # 기존 카테고리가 더 클 경우 
-            # else: # 반대일 경우 즉 distance 가 - 일 경우 
+            ca_number_for_update = original_ca_num - distance
+            ca_obj_for_create = Category.objects.get(
+                slug="ca" + str(ca_number_for_update))  # 차이만큼 빼준 category 를 적용
+            # if(distance > 0 ):  # 기존 카테고리가 더 클 경우
+            # else: # 반대일 경우 즉 distance 가 - 일 경우
             #     ca_number_for_update = original_ca_num -  distance
             #     print("ca_number_for_update check 2222222222222222222222222222222222: ", ca_number_for_update)
-            #     ca_obj_for_create = Category.objects.get(slug="ca"+str(ca_number_for_update))                   
-            
+            #     ca_obj_for_create = Category.objects.get(slug="ca"+str(ca_number_for_update))
+
             print("ca_obj_for_create : ", ca_obj_for_create)
             myshortcut = MyShortCut.objects.create(
                 author=request.user,
@@ -240,24 +267,29 @@ def partial_copy_for_skilnote_from_another_user(request):
         'message': "부분 복사 test success",
     })
 
+
 def partial_delete_btn_for_user(request):
     writer_start = request.POST['writer_start']
     writer_end = request.POST['writer_end']
     # user_start = request.POST['user_start']
     # user_end = request.POST['user_end']
-    writer_name = request.POST['writer_name']    
-    writer_array = [i for i in range(int(writer_start), int(writer_end) + 1)]    
-    
+    writer_name = request.POST['writer_name']
+    writer_array = [i for i in range(int(writer_start), int(writer_end) + 1)]
+
     print("partial rang : ", writer_start, writer_end)
-    
+
     for original_ca_id in writer_array:
-        original_ca_for_update = "ca"+str(original_ca_id)        
-        result_for_category_update = CategoryNick.objects.filter(Q(author=request.user.id)).update(**{original_ca_for_update: original_ca_for_update})        
-        MyShortCut.objects.filter(Q(author=request.user) & Q(category=original_ca_id)).delete()            
-    
+        original_ca_for_update = "ca" + str(original_ca_id)
+        result_for_category_update = CategoryNick.objects.filter(
+            Q(author=request.user.id)).update(
+                **{original_ca_for_update: original_ca_for_update})
+        MyShortCut.objects.filter(
+            Q(author=request.user) & Q(category=original_ca_id)).delete()
+
     return JsonResponse({
         'message': "부분 삭제 success",
-    })    
+    })
+
 
 def partial_move_for_my_note(request):
     # print("hi")
@@ -273,37 +305,48 @@ def partial_move_for_my_note(request):
     # CommentForShortCut.objects.filter(Q(author=request.user)).delete()
 
     print("partial rang : ", writer_start, writer_end, user_start, user_end)
-    
+
     # 범위를 리스트로 만들기 [1,2,3,4..]
-    writer_array = [i for i in range(int(writer_start), int(writer_end) + 1)]    
+    writer_array = [i for i in range(int(writer_start), int(writer_end) + 1)]
     user_array = [i for i in range(int(user_start), int(user_end) + 1)]
-    ca_array = ["ca"+str(i) for i in range(int(writer_start), int(writer_end) + 1)]
-   
+    ca_array = [
+        "ca" + str(i) for i in range(int(writer_start),
+                                     int(writer_end) + 1)
+    ]
+
     # 각각의 범위 앞 숫자를 가져온뒤 차이를 계산
     min_writer_ca_num = int(writer_array[0])
     min_user_ca_num = int(user_array[0])
-  
+
     print("writer_array : ", writer_array)
     print("user_array : ", user_array)
     # writer 가 본인일때는 필요 없음
     print("writer_name : ", writer_name)
-    
+
     for index, original_ca_id in enumerate(writer_array):
         destination_ca_id = user_array[index]
-        original_ca_for_update = "ca"+str(original_ca_id)                
-        destination_ca_for_update = "ca"+str(index+1)                
+        original_ca_for_update = "ca" + str(original_ca_id)
+        destination_ca_for_update = "ca" + str(index + 1)
         print(original_ca_id, user_array[index])
-        
-        category_nick_list_obj = CategoryNick.objects.get(Q(author=note_ower_obj))
-        category_title_for_update = getattr(category_nick_list_obj, original_ca_for_update)
+
+        category_nick_list_obj = CategoryNick.objects.get(
+            Q(author=note_ower_obj))
+        category_title_for_update = getattr(category_nick_list_obj,
+                                            original_ca_for_update)
 
         print("category_title_for_update : ", category_title_for_update)
         print("original_ca_for_update : ", original_ca_for_update)
-        
-        update_result = MyShortCut.objects.filter(category=original_ca_id, author=request.user).update(category=destination_ca_id)
-        canick_update_result2 = CategoryNick.objects.filter(Q(author=request.user.id)).update(**{original_ca_for_update: original_ca_for_update})        
-        canick_update_result1 = CategoryNick.objects.filter(Q(author=request.user.id)).update(**{destination_ca_for_update: category_title_for_update})        
-        
+
+        update_result = MyShortCut.objects.filter(
+            category=original_ca_id,
+            author=request.user).update(category=destination_ca_id)
+        canick_update_result2 = CategoryNick.objects.filter(
+            Q(author=request.user.id)).update(
+                **{original_ca_for_update: original_ca_for_update})
+        canick_update_result1 = CategoryNick.objects.filter(
+            Q(author=request.user.id)).update(
+                **{destination_ca_for_update: category_title_for_update})
+
         print("canick_update_result2 : ", canick_update_result2)
         print("update result : ", update_result)
 
@@ -315,7 +358,6 @@ def partial_move_for_my_note(request):
 def delete_common_subject(request):
     user = request.user.username
     cs_id = request.POST.get('cs_id', '')
-
 
     if request.method == "POST" and request.is_ajax():
         gb = CommonSubject.objects.filter(Q(id=cs_id)).delete()
@@ -344,16 +386,19 @@ def partial_copy_for_skilnote(request):
 
     print("partial rang : ", writer_start, writer_end, user_start, user_end)
 
-    writer_array = [i for i in range(int(writer_start), int(writer_end) + 1)]    
+    writer_array = [i for i in range(int(writer_start), int(writer_end) + 1)]
     user_array = [i for i in range(int(user_start), int(user_end) + 1)]
-    
+
     min_writer_ca_num = int(writer_array[0])
     min_user_ca_num = int(user_array[0])
     distance = min_writer_ca_num - min_user_ca_num
-    
+
     # distance = int(writer_array[0]) - int(user_array[0])
-    ca_array = ["ca"+str(i) for i in range(int(writer_start), int(writer_end) + 1)]
-    
+    ca_array = [
+        "ca" + str(i) for i in range(int(writer_start),
+                                     int(writer_end) + 1)
+    ]
+
     print("writer_array : ", writer_array)
     print("user_array : ", user_array)
     print("writer_name : ", writer_name)
@@ -363,25 +408,28 @@ def partial_copy_for_skilnote(request):
 
     category_list_obj = CategoryNick.objects.filter(Q(author=note_ower_obj))
     print("category_list_obj : ", category_list_obj)
-    
-    for ca in ca_array:   
+
+    for ca in ca_array:
         ca_obj = CategoryNick.objects.get(Q(author=note_ower_obj))
-        category_title = getattr(ca_obj, ca)                       
+        category_title = getattr(ca_obj, ca)
         print("category_title : ", category_title)
-        print("count : ", CategoryNick.objects.filter(Q(author=request.user)).count())
-        
+        print("count : ",
+              CategoryNick.objects.filter(Q(author=request.user)).count())
+
         original_ca_num = int(ca[2:5])
         # print("writer_note_obj : ", writer_note_obj)
         # print("check !!!!!!!!!!!! : " , note.category.slug[2:5])
         print("distance ::::::::::::::::::::::::: ", distance)
-        
-        # ca_for_update1 = "ca"+str(original_ca_num)  
-        ca_for_update = "ca"+str(original_ca_num -  distance)  
-        
-        print("ca_for_update 5555555555555555555555555 ", ca_for_update)    
 
-        # result_for_ca_update1 = CategoryNick.objects.filter(Q(author=request.user.id)).update(**{ca_for_update1: ca_for_update1})        
-        result_for_ca_update2 = CategoryNick.objects.filter(Q(author=request.user.id)).update(**{ca_for_update: category_title})        
+        # ca_for_update1 = "ca"+str(original_ca_num)
+        ca_for_update = "ca" + str(original_ca_num - distance)
+
+        print("ca_for_update 5555555555555555555555555 ", ca_for_update)
+
+        # result_for_ca_update1 = CategoryNick.objects.filter(Q(author=request.user.id)).update(**{ca_for_update1: ca_for_update1})
+        result_for_ca_update2 = CategoryNick.objects.filter(
+            Q(author=request.user.id)).update(
+                **{ca_for_update: category_title})
         print("result_for_ca_update2 : ", result_for_ca_update2)
 
     writer_comment_list_obj = CommentForShortCut.objects.filter(
@@ -390,23 +438,25 @@ def partial_copy_for_skilnote(request):
 
     for ca_id in writer_array:
         print(ca_id)
-        writer_note_obj = MyShortCut.objects.filter(category=ca_id, author=note_ower_obj).order_by('created')
+        writer_note_obj = MyShortCut.objects.filter(
+            category=ca_id, author=note_ower_obj).order_by('created')
 
         # [1,2] => [3,4]
         # [3,4] => [1,2]
         for note in writer_note_obj:
             original_ca_num = int(note.category.slug[2:5])
             print("writer_note_obj : ", writer_note_obj)
-            print("check !!!!!!!!!!!! : " , note.category.slug[2:5])
+            print("check !!!!!!!!!!!! : ", note.category.slug[2:5])
             print("distance ::::::::::::::::::::::::: ", distance)
-            ca_number_for_update = original_ca_num -  distance
-            ca_obj_for_create = Category.objects.get(slug="ca"+str(ca_number_for_update)) # 차이만큼 빼준 category 를 적용
-            # if(distance > 0 ):  # 기존 카테고리가 더 클 경우 
-            # else: # 반대일 경우 즉 distance 가 - 일 경우 
+            ca_number_for_update = original_ca_num - distance
+            ca_obj_for_create = Category.objects.get(
+                slug="ca" + str(ca_number_for_update))  # 차이만큼 빼준 category 를 적용
+            # if(distance > 0 ):  # 기존 카테고리가 더 클 경우
+            # else: # 반대일 경우 즉 distance 가 - 일 경우
             #     ca_number_for_update = original_ca_num -  distance
             #     print("ca_number_for_update check 2222222222222222222222222222222222: ", ca_number_for_update)
-            #     ca_obj_for_create = Category.objects.get(slug="ca"+str(ca_number_for_update))                   
-            
+            #     ca_obj_for_create = Category.objects.get(slug="ca"+str(ca_number_for_update))
+
             print("ca_obj_for_create : ", ca_obj_for_create)
             myshortcut = MyShortCut.objects.create(
                 author=request.user,
@@ -440,7 +490,6 @@ def delete_common_subject(request):
     user = request.user.username
     cs_id = request.POST.get('cs_id', '')
 
-
     if request.method == "POST" and request.is_ajax():
         gb = CommonSubject.objects.filter(Q(id=cs_id)).delete()
         print('CommonSubject Delete 성공 : ', cs_id)
@@ -450,6 +499,7 @@ def delete_common_subject(request):
     else:
         return redirect('/wm/myshorcut/')
 
+
 def update_for_common_subject(request):
     print("update_plan 실행 확인")
 
@@ -457,19 +507,18 @@ def update_for_common_subject(request):
     if request.method == "POST" and request.is_ajax():
         common_subject_id = request.POST.get('common_subject_id', '')
         common_subject = request.POST.get('common_subject', '')
-        
+
         print("common_subject_id : ", common_subject_id)
         print("common_subject : ", common_subject)
-        
-        common_subject_obj = CommonSubject.objects.filter(id=common_subject_id).update(
-            subject=common_subject
-        )
+
+        common_subject_obj = CommonSubject.objects.filter(
+            id=common_subject_id).update(subject=common_subject)
         print('Lecture update Success !!!!!!!!!')
         return JsonResponse({
             'message': 'Plan Update Success',
-            'common_subject_id':common_subject_id,
-            'common_subject_subject':common_subject,
-            'common_subject_author':request.user.username
+            'common_subject_id': common_subject_id,
+            'common_subject_subject': common_subject,
+            'common_subject_author': request.user.username
         })
     else:
         return redirect('/todo')
@@ -481,10 +530,8 @@ def insert_for_common_subject(request):
     print("insert_for_lecture_list 실행")
     common_subject = request.POST['common_subject']
 
-    common_subject_obj = CommonSubject.objects.create(
-        author = request.user,
-        subject = common_subject
-    )
+    common_subject_obj = CommonSubject.objects.create(author=request.user,
+                                                      subject=common_subject)
 
     print("common_subject_obj : ", common_subject_obj.author)
     print("common_subject_obj : ", common_subject_obj.subject)
@@ -494,18 +541,17 @@ def insert_for_common_subject(request):
 
     return JsonResponse({
         'message': 'common_subject 추가 성공',
-        "common_subject_id":common_subject_obj.id,
-        "common_subject_author":common_subject_obj.author.username,
-        "common_subject_subject":common_subject_obj.subject,
-        
+        "common_subject_id": common_subject_obj.id,
+        "common_subject_author": common_subject_obj.author.username,
+        "common_subject_subject": common_subject_obj.subject,
     })
 
 
 def user_list_for_common_subject(request, cs_id):
-    
+
     cs_obj = CommonSubject.objects.get(id=cs_id)
     print("cs_obj : ", cs_obj)
-    
+
     if request.method == 'GET':
         user_list = User.objects.filter(profile__common_subject=cs_obj)
         print("user_list : ", user_list)
@@ -514,7 +560,8 @@ def user_list_for_common_subject(request, cs_id):
             "user_list": user_list,
         })
     else:
-        return HttpResponse("Request method is not a GET")    
+        return HttpResponse("Request method is not a GET")
+
 
 def common_subject_list(request):
     if request.method == 'GET':
@@ -526,7 +573,6 @@ def common_subject_list(request):
         })
     else:
         return HttpResponse("Request method is not a GET")
-
 
 
 def delete_lecture_list(request, lecture_id):
@@ -541,6 +587,7 @@ def delete_lecture_list(request, lecture_id):
     else:
         return redirect('/wm/myshorcut/')
 
+
 def update_lecture_bookmark(request):
     print("update_plan 실행 확인")
 
@@ -549,20 +596,21 @@ def update_lecture_bookmark(request):
         lecture_id = request.POST.get('lecture_id', '')
         lecture_title = request.POST.get('lecture_title', '')
         lecture_url = request.POST.get('lecture_url', '')
-        
+
         print("lecture_id : ", lecture_id)
         print("lecture_title : ", lecture_title)
         print("lecture_url : ", lecture_url)
-        
-        my_lecture_bookmark = LectureBookMark.objects.filter(id=lecture_id).update(
-            title=lecture_title,
-            lecture_url=lecture_url,
-        )
+
+        my_lecture_bookmark = LectureBookMark.objects.filter(
+            id=lecture_id).update(
+                title=lecture_title,
+                lecture_url=lecture_url,
+            )
         print('Lecture update Success !!!!!!!!!')
         return JsonResponse({
             'message': 'Plan Update Success',
-            'lecture_title':lecture_title,
-            'lecture_url':lecture_url
+            'lecture_title': lecture_title,
+            'lecture_url': lecture_url
         })
     else:
         return redirect('/todo')
@@ -573,10 +621,8 @@ def insert_for_lecture_list(request):
     print("insert_for_lecture_list 실행")
     lecture_title = request.POST['lecture_title']
 
-    my_lecture = LectureBookMark.objects.create(
-        author = request.user,
-        title =lecture_title
-    )
+    my_lecture = LectureBookMark.objects.create(author=request.user,
+                                                title=lecture_title)
 
     print("author : ", my_lecture.author)
     print("lecture_title : ", my_lecture.title)
@@ -586,9 +632,9 @@ def insert_for_lecture_list(request):
 
     return JsonResponse({
         'message': 'my_lecture row 추가 성공',
-        "lecture_id":my_lecture.id,
-        "lecture_author":my_lecture.author.username,
-        "lecture_title":my_lecture.title,
+        "lecture_id": my_lecture.id,
+        "lecture_author": my_lecture.author.username,
+        "lecture_title": my_lecture.title,
         "lecture_created_at": my_lecture.created_at,
         "lecture_url": my_lecture.lecture_url
     })
@@ -597,13 +643,14 @@ def insert_for_lecture_list(request):
 def lecture_list_for_user(request, note_user):
     if request.method == 'GET':
         print("geust_book_list 실행")
-        
-        if(note_user):
+
+        if (note_user):
             owner = User.objects.get(username=note_user)
         else:
             owner = User.objects.get(username=request.user.username)
-            
-        object_list = LectureBookMark.objects.filter(author=owner).order_by('created_at')
+
+        object_list = LectureBookMark.objects.filter(
+            author=owner).order_by('created_at')
         print("object_list : ", object_list)
 
         return render(request, 'wm/lecture_list.html', {
@@ -611,6 +658,7 @@ def lecture_list_for_user(request, note_user):
         })
     else:
         return HttpResponse("Request method is not a GET")
+
 
 def delete_plan_list(request, plan_id):
     user = request.user
@@ -625,15 +673,12 @@ def delete_plan_list(request, plan_id):
         return redirect('/wm/myshorcut/')
 
 
-
 def insert_plan(request):
     print("insert_for_guest_book 실행")
     plan_content = request.POST['plan_content']
 
-    my_plan = MyPlan.objects.create(
-        owner_for_plan =request.user,
-        plan_content =plan_content
-    )
+    my_plan = MyPlan.objects.create(owner_for_plan=request.user,
+                                    plan_content=plan_content)
 
     print("plan_content : ", my_plan.plan_content)
     print("plan_start_time : ", my_plan.start_time)
@@ -643,14 +688,15 @@ def insert_plan(request):
 
     return JsonResponse({
         'message': 'guest_book row 추가 성공',
-        "plan_content":my_plan.plan_content,
-        "plan_start_time":my_plan.start_time,
-        "plan_end_time":my_plan.end_time,
-        "plan_start_ca":my_plan.start_ca,
-        "plan_end_ca":my_plan.end_ca,
-        "owner_for_plan":my_plan.owner_for_plan.username,
+        "plan_content": my_plan.plan_content,
+        "plan_start_time": my_plan.start_time,
+        "plan_end_time": my_plan.end_time,
+        "plan_start_ca": my_plan.start_ca,
+        "plan_end_ca": my_plan.end_ca,
+        "owner_for_plan": my_plan.owner_for_plan.username,
     })
-    
+
+
 def update_plan(request):
     print("update_plan 실행 확인")
 
@@ -661,18 +707,17 @@ def update_plan(request):
         plan_start_ca = request.POST.get('plan_start_ca', '')
         plan_end_ca = request.POST.get('plan_end_ca', '')
         plan_end_time = datetime.now()
-        
+
         print("plan_id : ", plan_id)
         print("plan_content : ", plan_content)
         print("plan_start_ca : ", plan_start_ca)
         print("plan_end_ca : ", plan_end_ca)
-        
+
         plan = MyPlan.objects.filter(id=plan_id).update(
             plan_content=plan_content,
             start_ca=plan_start_ca,
             end_ca=plan_end_ca,
-            end_time = plan_end_time
-        )
+            end_time=plan_end_time)
         print('Plan update Success !!!!!!!!!')
         return JsonResponse({
             'message': 'Plan Update Success',
@@ -681,23 +726,22 @@ def update_plan(request):
     else:
         return redirect('/todo')
 
+
 def update_plan_complete(request):
     print("update_plan_complete 실행 확인")
-    
+
     user = request.user
     if request.method == "POST" and request.is_ajax():
         plan_id = request.POST.get('plan_id', '')
         plan_completed = request.POST.get('plan_completed', '')
         plan_end_time = datetime.now()
-        
+
         print("plan_id : ", plan_id)
         print("plan_completed : ", plan_completed)
         print("user : ", user)
-        
+
         plan = MyPlan.objects.filter(id=plan_id).update(
-            completed=plan_completed,
-            end_time = plan_end_time
-        )
+            completed=plan_completed, end_time=plan_end_time)
         print('Plan update Success !!!!!!!!!')
         return JsonResponse({
             'message': 'Plan Update Success',
@@ -730,13 +774,14 @@ def joinForOtherMemberNote(request):
             note_owner=note_ower_obj, member=member).count()
         print("existing_user : ", existing_user)
 
-        if(existing_user >= 1):
+        if (existing_user >= 1):
             return JsonResponse({
-                'message': request.user.username + '님은 이미 가입 했습니다',
+                'message':
+                request.user.username + '님은 이미 가입 했습니다',
             })
 
-        allow_row = AllowListForSkilNote(
-            note_owner=note_ower_obj, member=member)
+        allow_row = AllowListForSkilNote(note_owner=note_ower_obj,
+                                         member=member)
         allow_row.save()
 
         print("allow_row : ", allow_row)
@@ -759,8 +804,8 @@ def cancleForOtherMemberNote(request):
 
         note_ower_obj = User.objects.get(username=note_owner)
 
-        allow_row = AllowListForSkilNote.objects.get(
-            note_owner=note_ower_obj, member=member)
+        allow_row = AllowListForSkilNote.objects.get(note_owner=note_ower_obj,
+                                                     member=member)
         delete_id = allow_row.id
         allow_row.delete()
 
@@ -789,9 +834,9 @@ def update_for_permission(request):
     print("changed_permission : ", changed_permission)
 
     if request.method == "POST" and request.is_ajax():
-        result = AllowListForSkilNote.objects.filter(Q(note_owner=note_ower_obj, member=member)).update(permission=Case(
-            When(permission=True, then=False),
-            default=True))
+        result = AllowListForSkilNote.objects.filter(
+            Q(note_owner=note_ower_obj, member=member)).update(permission=Case(
+                When(permission=True, then=False), default=True))
         print('AllowListForSkilNote permission update 성공 : ', result)
         return JsonResponse({
             'message': 'permission 업데이트 성공',
@@ -815,7 +860,8 @@ def update_for_start(request):
 
     if request.method == "POST" and request.is_ajax():
         result = AllowListForSkilNote.objects.filter(
-            Q(note_owner=note_ower_obj, member=member)).update(start_at=start_at)
+            Q(note_owner=note_ower_obj,
+              member=member)).update(start_at=start_at)
         # result = AllowListForSkilNote.objects.filter(Q(note_owner=note_ower_obj, member=member)).update(end_at=end_at)
         print('AllowListForSkilNote permission update 성공 : ', result)
         return JsonResponse({
@@ -884,6 +930,7 @@ class allow_list(ListView):
 
 # 0117
 
+
 class main_page(LoginRequiredMixin, ListView):
     model = User
     paginate_by = 10
@@ -905,13 +952,11 @@ class main_page(LoginRequiredMixin, ListView):
 
 
 def manualPage(request):
-    return render(request, 'wm/manual.html', {
-    })
+    return render(request, 'wm/manual.html', {})
 
 
 def intro_for_skilnote(request):
-    return render(request, 'wm/intro_page.html', {
-    })
+    return render(request, 'wm/intro_page.html', {})
 
 
 # 입력 모드
@@ -935,16 +980,17 @@ class MyShortCutListView2(LoginRequiredMixin, ListView):
         print("user : ", user)
 
         if self.request.user.is_anonymous:
-            return MyShortCut.objects.filter(author=self.request.user).order_by('created')
+            return MyShortCut.objects.filter(
+                author=self.request.user).order_by('created')
         else:
             selected_category_id = self.request.user.profile.selected_category_id
-            return MyShortCut.objects.filter(Q(author=user, category=selected_category_id)).order_by('created')
+            return MyShortCut.objects.filter(
+                Q(author=user,
+                  category=selected_category_id)).order_by('created')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         # 카테고리 각각의 정보를 저장하는 테이블 없으면 만든다.
-        cn = CategoryNick.objects.get_or_create(
-            author=self.request.user,
-        )
+        cn = CategoryNick.objects.get_or_create(author=self.request.user, )
         category_id = self.request.user.profile.selected_category_id
         print("category_id :::::::::::::::::::::::::::::::::::", category_id)
         context = super(MyShortCutListView2, self).get_context_data(**kwargs)
@@ -974,15 +1020,16 @@ class MyShortcutListByCategory2(ListView):
     def get_queryset(self):
         slug = self.kwargs['slug']
         category = Category.objects.get(slug=slug)
-        pf = Profile.objects.filter(Q(user=self.request.user)).update(
-            selected_category_id=category.id)
+        pf = Profile.objects.filter(
+            Q(user=self.request.user)).update(selected_category_id=category.id)
         print('category id update 성공')
 
         user = User.objects.get(Q(username=self.request.user))
 
         print('user : ', user)
 
-        return MyShortCut.objects.filter(category=category, author=user).order_by('created')
+        return MyShortCut.objects.filter(category=category,
+                                         author=user).order_by('created')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         user = User.objects.get(Q(username=self.request.user))
@@ -1012,7 +1059,7 @@ def plan_list_for_user(request, plan_user):
     if request.method == 'GET':
         print("plan_list_for_user 실행")
         owner = User.objects.get(username=plan_user)
-        
+
         print("owner : ", owner)
 
         object_list = MyPlan.objects.filter(
@@ -1026,9 +1073,6 @@ def plan_list_for_user(request, plan_user):
         return HttpResponse("Request method is not a GET")
 
 
-
-
-
 def insert_temp_skill_note_for_textarea(request):
     print("insert_temp_skill_note_for_textarea 실행")
     ty = Type.objects.get(type_name="textarea")
@@ -1036,13 +1080,11 @@ def insert_temp_skill_note_for_textarea(request):
     ca = Category.objects.get(id=category_id)
     title = request.POST['title']
 
-    wm = TempMyShortCut.objects.create(
-        author=request.user,
-        title=title,
-        type=ty,
-        category=ca,
-        content2=""
-    )
+    wm = TempMyShortCut.objects.create(author=request.user,
+                                       title=title,
+                                       type=ty,
+                                       category=ca,
+                                       content2="")
 
     print("wm : ", wm)
 
@@ -1116,9 +1158,9 @@ def new_comment_for_skilpage(request, user_name, category_id):
             comment.user_name = user_name
             comment.category_id = category_id
             comment.save()
-            return redirect('/wm/myshortcut/'+user_name+"/"+category_id)
+            return redirect('/wm/myshortcut/' + user_name + "/" + category_id)
     else:
-        return redirect('/wm/myshortcut/'+user_name+"/"+category_id)
+        return redirect('/wm/myshortcut/' + user_name + "/" + category_id)
 
 
 # 2244
@@ -1139,10 +1181,12 @@ class MyShortcutListByUser(ListView):
         if self.request.user.is_anonymous:
             # return MyShortCut.objects.filter(author=user).order_by('created')
             selected_category_id = category_id
-            return MyShortCut.objects.filter(Q(author=user, category=category_id)).order_by('created')
+            return MyShortCut.objects.filter(
+                Q(author=user, category=category_id)).order_by('created')
         else:
             selected_category_id = category_id
-            return MyShortCut.objects.filter(Q(author=user, category=category_id)).order_by('created')
+            return MyShortCut.objects.filter(
+                Q(author=user, category=category_id)).order_by('created')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         user = self.kwargs['user']
@@ -1158,13 +1202,14 @@ class MyShortcutListByUser(ListView):
             allowed_for_current_user = "False"
 
         print("allowed_for_current_user : ", allowed_for_current_user)
-        if(allowed_for_current_user != "False"):
-            if(allowed_for_current_user.permission == True):
+        if (allowed_for_current_user != "False"):
+            if (allowed_for_current_user.permission == True):
                 self.allowed_for_current_user = True
 
                 # 만약 현재 접속하려는 ca 숫자가 AllowListForSkilNoted의 start_at 과 end_at 사이가 아닐 경우
                 # allowed_for_current_user false
-                if(allowed_for_current_user.start_at <= category_id and allowed_for_current_user.end_at >= category_id):
+                if (allowed_for_current_user.start_at <= category_id
+                        and allowed_for_current_user.end_at >= category_id):
                     self.allowed_for_current_user = True
                 else:
                     self.allowed_for_current_user = False
@@ -1179,12 +1224,10 @@ class MyShortcutListByUser(ListView):
         print("category_id : ", category_id)
         # update
         # 0110 update for 비로그인 유저 click_count
-        Profile.objects.filter(user=user).update(
-            click_count=F('click_count')+1)
+        Profile.objects.filter(user=user).update(click_count=F('click_count') +
+                                                 1)
 
-        cn = CategoryNick.objects.get_or_create(
-            author=user,
-        )
+        cn = CategoryNick.objects.get_or_create(author=user, )
 
         context = super(MyShortcutListByUser, self).get_context_data(**kwargs)
         context['category_list'] = Category.objects.all()
@@ -1201,14 +1244,15 @@ class MyShortcutListByUser(ListView):
         context['page_user'] = user
         context['comment_list_for_page'] = CommentForPage.objects.filter(
             user_name=user, category_id=category_id)
-        context['star_count_for_user'] = RecommandationUserAboutSkillNote.objects.filter(
-            user=user.id).count
+        context[
+            'star_count_for_user'] = RecommandationUserAboutSkillNote.objects.filter(
+                user=user.id).count
 
         context['allowed_for_current_user'] = self.allowed_for_current_user
 
         print("self.request.user : ", self.request.user)
 
-        if(self.request.user.is_authenticated):
+        if (self.request.user.is_authenticated):
             context['InsertFormForOhterUserNote'] = InsertFormForOhterUserNote
             context['current_user'] = self.request.user
         else:
@@ -1230,12 +1274,12 @@ def category_plus_1_for_current_user(request):
     print("ca_num type :", type(ca_num))
 
     # data2 = {'ca{}'.format(x+1): F('ca{}'.format(x)) for x in range(int(ca_num), 99)}
-    data2 = {'ca{}'.format(x+1): F('ca{}'.format(x))
-             for x in range(int(ca_num), 120)}
+    data2 = {
+        'ca{}'.format(x + 1): F('ca{}'.format(x))
+        for x in range(int(ca_num), 120)
+    }
 
-    CategoryNick.objects.filter(
-        author=request.user
-    ).update(**data2)
+    CategoryNick.objects.filter(author=request.user).update(**data2)
 
     # data1 = {'ca{}'.format(ca_num): "+1 실행 완료" }
 
@@ -1252,18 +1296,16 @@ def category_plus_1_for_current_user(request):
 
     for sn in skil_note:
         # if(sn.category.id >= int(ca_num) and sn.category.id != 99):
-        if(sn.category.id >= int(ca_num) and sn.category.id != 120):
+        if (sn.category.id >= int(ca_num) and sn.category.id != 120):
             print("sn.category.id : ", sn.category.id)
-            print("int(sn.category.id)+1 : ", int(sn.category.id)+1)
-            ca = Category.objects.get(id=int(sn.category.id)+1)
-            MyShortCut.objects.filter(id=sn.id).update(
-                category=ca, created=F('created'))
+            print("int(sn.category.id)+1 : ", int(sn.category.id) + 1)
+            ca = Category.objects.get(id=int(sn.category.id) + 1)
+            MyShortCut.objects.filter(id=sn.id).update(category=ca,
+                                                       created=F('created'))
         else:
             print("sn.category.id : ", sn.category.id)
 
-    return JsonResponse({
-        'message': "ca"+ca_num+"부터 ca120까지 +1 성공"
-    })
+    return JsonResponse({'message': "ca" + ca_num + "부터 ca120까지 +1 성공"})
 
 
 def category_minus_1_for_current_user(request):
@@ -1273,16 +1315,17 @@ def category_minus_1_for_current_user(request):
     print("ca_num check : ", ca_num)
     print("ca_num type :", type(ca_num))
 
-    data = {'ca{}'.format(x-1): F('ca{}'.format(x))
-            for x in range(120, int(ca_num)-1, -1)}
-    CategoryNick.objects.filter(
-        author=request.user
-    ).update(**data)
+    data = {
+        'ca{}'.format(x - 1): F('ca{}'.format(x))
+        for x in range(120,
+                       int(ca_num) - 1, -1)
+    }
+    CategoryNick.objects.filter(author=request.user).update(**data)
 
     skil_note = MyShortCut.objects.filter(Q(author=request.user))
 
-    if(int(ca_num) > 1):
-        ca_delete_num = int(ca_num)-1
+    if (int(ca_num) > 1):
+        ca_delete_num = int(ca_num) - 1
 
     ca_delete = Category.objects.get(id=ca_delete_num)
     MyShortCut.objects.filter(Q(author=request.user)
@@ -1291,17 +1334,15 @@ def category_minus_1_for_current_user(request):
 
     for sn in skil_note:
         # print("sn.category.id : ", sn.category.id)
-        if(sn.category.id >= int(ca_num) and sn.category.id != 1):
+        if (sn.category.id >= int(ca_num) and sn.category.id != 1):
             # ca=Category.objects.get(id=int(sn.category.id)+1)
             print("sn.category.id : ", sn.category.id)
-            print("int(sn.category.id)-1 : ", int(sn.category.id)-1)
-            ca = Category.objects.get(id=int(sn.category.id)-1)
-            MyShortCut.objects.filter(id=sn.id).update(
-                category=ca, image=F('image'))
+            print("int(sn.category.id)-1 : ", int(sn.category.id) - 1)
+            ca = Category.objects.get(id=int(sn.category.id) - 1)
+            MyShortCut.objects.filter(id=sn.id).update(category=ca,
+                                                       image=F('image'))
 
-    return JsonResponse({
-        'message': "ca"+ca_num+"부터 ca120까지 -1 성공"
-    })
+    return JsonResponse({'message': "ca" + ca_num + "부터 ca120까지 -1 성공"})
 
 
 def move_to_skil_blog(request):
@@ -1320,18 +1361,16 @@ def move_to_skil_blog(request):
 
     for p in skill_note_list:
         # print("p : ", p)
-        profile = SkilBlogContent.objects.create(
-            sbt=sbt,
-            author=request.user,
-            title=p.title,
-            filename=p.filename,
-            content1=p.content1,
-            content2=p.content2,
-            type_id=p.type_id,
-            image=p.image
-        )
+        profile = SkilBlogContent.objects.create(sbt=sbt,
+                                                 author=request.user,
+                                                 title=p.title,
+                                                 filename=p.filename,
+                                                 content1=p.content1,
+                                                 content2=p.content2,
+                                                 type_id=p.type_id,
+                                                 image=p.image)
     return JsonResponse({
-        'message': "체크한 항목들을 스킬 블로그로 옮겼습니다."+title,
+        'message': "체크한 항목들을 스킬 블로그로 옮겼습니다." + title,
         'id': sbt.id
     })
 
@@ -1372,8 +1411,8 @@ def plus_recommand_for_skillnote_user(request):
         recommand_count = RecommandationUserAboutSkillNote.objects.filter(
             Q(user=author)).count()  # 추천 받은 사람 점수 확인
         print('추천 ---------------------------------------------------')
-        profile = Profile.objects.filter(Q(user=author_id)).update(
-            skill_note_reputation=recommand_count)
+        profile = Profile.objects.filter(
+            Q(user=author_id)).update(skill_note_reputation=recommand_count)
 
         return JsonResponse({
             'message': "추천 -1 ",
@@ -1400,7 +1439,7 @@ def copy_chapter_to_x(request):
     print("list_for_chapter_copy : ", list_for_chapter_copy)
 
     CategoryNick.objects.filter(Q(author=request.user)).update(
-        **{"ca"+destination_chapter: category_title})
+        **{"ca" + destination_chapter: category_title})
 
     # if(request.user.username != owner):
     #     MyShortCut.objects.filter(Q(author=request.user) & Q(category = index)).delete()
@@ -1436,8 +1475,10 @@ def copy_chapter_to_x(request):
 
     print("챕터 복사 버튼 클릭", owner, category, index)
     return JsonResponse({
-        'message': owner + '의 노트 ' + category + '를 ' + destination_chapter + '로 복사 했습니다'
+        'message':
+        owner + '의 노트 ' + category + '를 ' + destination_chapter + '로 복사 했습니다'
     })
+
 
 # MyShortCut , CommentForShortCut, CategoryNick
 
@@ -1446,7 +1487,7 @@ def copy_to_me_from_user_id(request):
 
     author = request.POST['author']
     # 나의 노트 모두 지우기
-    if(MyShortCut.objects.filter(Q(author=request.user)).count() != 0):
+    if (MyShortCut.objects.filter(Q(author=request.user)).count() != 0):
         MyShortCut.objects.filter(Q(author=request.user)).delete()
         CategoryNick.objects.filter(Q(author=request.user)).delete()
         CommentForShortCut.objects.filter(Q(author=request.user)).delete()
@@ -1598,7 +1639,7 @@ def copy_to_me_from_user_id(request):
         )
 
     return JsonResponse({
-        'message': author+'의 노트 전체를 나의 노트로 복사 했습니다',
+        'message': author + '의 노트 전체를 나의 노트로 복사 했습니다',
     })
 
 
@@ -1693,10 +1734,7 @@ def update_temp_skil_title_for_backend(request, id):
             Q(id=id)).update(title=title)
         print('TempMyShortCutForBackEnd update 성공 id : ', id)
 
-        return JsonResponse({
-            'message': 'shortcut 업데이트 성공',
-            'title': title
-        })
+        return JsonResponse({'message': 'shortcut 업데이트 성공', 'title': title})
     else:
         return redirect('/todo')
 
@@ -1720,13 +1758,11 @@ def insert_temp_skill_note_using_input_for_backend(request):
     ca = Category.objects.get(id=category_id)
     title = request.POST['title']
 
-    wm = TempMyShortCutForBackEnd.objects.create(
-        author=request.user,
-        title=title,
-        type=ty,
-        category=ca,
-        content1=""
-    )
+    wm = TempMyShortCutForBackEnd.objects.create(author=request.user,
+                                                 title=title,
+                                                 type=ty,
+                                                 category=ca,
+                                                 content1="")
     print("wm : ", wm)
     return JsonResponse({
         'message': '인풋 박스 추가 성공',
@@ -1743,13 +1779,11 @@ def insert_temp_skill_note_using_textarea_for_backend(request):
     ca = Category.objects.get(id=category_id)
     title = request.POST['title']
 
-    wm = TempMyShortCutForBackEnd.objects.create(
-        author=request.user,
-        title=title,
-        type=ty,
-        category=ca,
-        content2=""
-    )
+    wm = TempMyShortCutForBackEnd.objects.create(author=request.user,
+                                                 title=title,
+                                                 type=ty,
+                                                 category=ca,
+                                                 content2="")
 
     print("wm : ", wm)
 
@@ -1830,13 +1864,11 @@ def insert_temp_skill_note_for_input(request):
     ca = Category.objects.get(id=category_id)
     title = request.POST['title']
 
-    wm = TempMyShortCut.objects.create(
-        author=request.user,
-        title=title,
-        type=ty,
-        category=ca,
-        content1=""
-    )
+    wm = TempMyShortCut.objects.create(author=request.user,
+                                       title=title,
+                                       type=ty,
+                                       category=ca,
+                                       content1="")
     print("wm : ", wm)
     return JsonResponse({
         'message': '인풋 박스 추가 성공',
@@ -1906,10 +1938,7 @@ def update_temp_skil_title(request, id):
         todo = TempMyShortCut.objects.filter(Q(id=id)).update(title=title)
         print('TempMyShortCut update 성공 id : ', id)
 
-        return JsonResponse({
-            'message': 'shortcut 업데이트 성공',
-            'title': title
-        })
+        return JsonResponse({'message': 'shortcut 업데이트 성공', 'title': title})
     else:
         return redirect('/todo')
 
@@ -1923,8 +1952,8 @@ def copyForCategorySubjectToMyCategory(request):
     print("original_category : ", original_category)
     print("destination_category : ", destination_category)
 
-    MyShortCut.objects.filter(Q(author=request.user) & Q(
-        category=destination_category)).delete()
+    MyShortCut.objects.filter(
+        Q(author=request.user) & Q(category=destination_category)).delete()
 
     user_id = User.objects.get(username=author).id
     ca_id = Category.objects.get(name=original_category)
@@ -1945,7 +1974,9 @@ def copyForCategorySubjectToMyCategory(request):
             category=category,
         )
     return JsonResponse({
-        'message': author+'의 ' + original_category + '를 나의 ' + destination_category + '로 복사 했습니다',
+        'message':
+        author + '의 ' + original_category + '를 나의 ' + destination_category +
+        '로 복사 했습니다',
     })
 
 
@@ -1962,7 +1993,7 @@ class search_skil_note_by_word(ListView):
             page_user = False
 
         # 검색할 유저(로그인 유저일 경우 => 나 )
-        if(request.user.is_authenticated):
+        if (request.user.is_authenticated):
             user = self.request.user
             search_word = self.request.POST['search_word']
             search_option = self.request.POST['search_option']
@@ -1970,14 +2001,16 @@ class search_skil_note_by_word(ListView):
             print("search_option : ", search_option)
 
         # 로그인 유저에 대한 유저 객체 생성
-        if(page_user):
+        if (page_user):
             user = User.objects.get(username=page_user)
         else:
             user = User.objects.get(username=user)
 
         # 쿼리셋 객체 생성
-        qs = MyShortCut.objects.filter(Q(author=user)).filter(Q(title__icontains=search_word) | Q(
-            content1__icontains=search_word) | Q(content2__icontains=search_word)).order_by('-category')
+        qs = MyShortCut.objects.filter(Q(author=user)).filter(
+            Q(title__icontains=search_word)
+            | Q(content1__icontains=search_word)
+            | Q(content2__icontains=search_word)).order_by('-category')
         return qs
 
 
@@ -1992,8 +2025,9 @@ def searchSkilNoteViewByIdAndWord(request):
     print("page_user : ", page_user)
     print("search_word : ", search_word)
 
-    myshortcut_list = MyShortCut.objects.filter((Q(title__icontains=search_word) | Q(
-        content1__icontains=search_word) | Q(content2__icontains=search_word)) & Q(author=page_user))
+    myshortcut_list = MyShortCut.objects.filter(
+        (Q(title__icontains=search_word) | Q(content1__icontains=search_word)
+         | Q(content2__icontains=search_word)) & Q(author=page_user))
 
     # if query:
     #     manual_list = Manual.objects.filter(
@@ -2033,9 +2067,7 @@ def delete_comment_for_my_shortcut(request, shortcut_comment_id):
 def update_comment_for_my_shortcut(request, shortcut_comment_id):
     print('shortcut_comment_id : ', shortcut_comment_id)
     co = CommentForShortCut.objects.filter(id=shortcut_comment_id).update(
-        title=request.POST['title'],
-        content=request.POST['content']
-    )
+        title=request.POST['title'], content=request.POST['content'])
 
     return JsonResponse({
         'message': '댓글 수정 성공',
@@ -2045,12 +2077,10 @@ def update_comment_for_my_shortcut(request, shortcut_comment_id):
 def new_comment_for_my_shortcut(request, shortcut_id):
     print('shortcut_id : ', shortcut_id)
     shortcut = MyShortCut.objects.get(id=shortcut_id)
-    co = CommentForShortCut.objects.create(
-        shortcut=shortcut,
-        author=request.user,
-        title="default title",
-        content="default content"
-    )
+    co = CommentForShortCut.objects.create(shortcut=shortcut,
+                                           author=request.user,
+                                           title="default title",
+                                           content="default content")
 
     return JsonResponse({
         'message': shortcut.title + '에 대해 comment 추가 성공 ',
@@ -2067,41 +2097,31 @@ def create_new4_textarea(request):
     ca = Category.objects.get(id=category_id)
     # title = request.POST['title']
 
-    wm1 = MyShortCut.objects.create(
-        author=request.user,
-        title="title1",
-        type=ty,
-        category=ca,
-        content2=""
-    )
-    wm2 = MyShortCut.objects.create(
-        author=request.user,
-        title="title2",
-        type=ty,
-        category=ca,
-        content2=""
-    )
-    wm3 = MyShortCut.objects.create(
-        author=request.user,
-        title="title3",
-        type=ty,
-        category=ca,
-        content2=""
-    )
-    wm4 = MyShortCut.objects.create(
-        author=request.user,
-        title="title4",
-        type=ty,
-        category=ca,
-        content2=""
-    )
-    wm5 = MyShortCut.objects.create(
-        author=request.user,
-        title="title5",
-        type=ty,
-        category=ca,
-        content2=""
-    )
+    wm1 = MyShortCut.objects.create(author=request.user,
+                                    title="title1",
+                                    type=ty,
+                                    category=ca,
+                                    content2="")
+    wm2 = MyShortCut.objects.create(author=request.user,
+                                    title="title2",
+                                    type=ty,
+                                    category=ca,
+                                    content2="")
+    wm3 = MyShortCut.objects.create(author=request.user,
+                                    title="title3",
+                                    type=ty,
+                                    category=ca,
+                                    content2="")
+    wm4 = MyShortCut.objects.create(author=request.user,
+                                    title="title4",
+                                    type=ty,
+                                    category=ca,
+                                    content2="")
+    wm5 = MyShortCut.objects.create(author=request.user,
+                                    title="title5",
+                                    type=ty,
+                                    category=ca,
+                                    content2="")
 
     print("wm1 : ", wm1)
 
@@ -2111,6 +2131,7 @@ def create_new4_textarea(request):
         'shortcut_title': wm1.title,
         'shortcut_content2': wm1.content2,
     })
+
 
 # myshortcut_row, shorcut_id, shorcut_content
 
@@ -2122,14 +2143,12 @@ def create_new1_input(request):
     ca = Category.objects.get(id=category_id)
     title = request.POST['title']
 
-    wm = MyShortCut.objects.create(
-        author=request.user,
-        title=title,
-        type=ty,
-        category=ca,
-        content1="",
-        created=datetime.now()
-    )
+    wm = MyShortCut.objects.create(author=request.user,
+                                   title=title,
+                                   type=ty,
+                                   category=ca,
+                                   content1="",
+                                   created=datetime.now())
     print("wm : ", wm)
     return JsonResponse({
         'message': '인풋 박스 추가 성공',
@@ -2146,18 +2165,19 @@ def create_new1_input_between(request, current_article_id):
     print("current_article_time : ", current_article.created)
 
     smae_category_for_current_article = MyShortCut.objects.filter(
-        author=current_article.author, category=current_article.category).order_by("created")
+        author=current_article.author,
+        category=current_article.category).order_by("created")
 
     same_category_id_array = []
 
     for i, p in enumerate(smae_category_for_current_article):
         # print('i',i)
         if (p.created <= current_article.created):
-            MyShortCut.objects.filter(id=p.id).update(
-                created=F('created')+timedelta(seconds=0))
+            MyShortCut.objects.filter(id=p.id).update(created=F('created') +
+                                                      timedelta(seconds=0))
         else:
-            MyShortCut.objects.filter(id=p.id).update(
-                created=F('created')+timedelta(seconds=i+1))
+            MyShortCut.objects.filter(id=p.id).update(created=F('created') +
+                                                      timedelta(seconds=i + 1))
 
     print("create_new1_input 실행")
     ty = Type.objects.get(type_name="input")
@@ -2165,14 +2185,13 @@ def create_new1_input_between(request, current_article_id):
     ca = Category.objects.get(id=category_id)
     title = request.POST['title']
 
-    wm = MyShortCut.objects.create(
-        author=request.user,
-        title=title,
-        type=ty,
-        category=ca,
-        content1="",
-        created=current_article.created+timedelta(seconds=1.5)
-    )
+    wm = MyShortCut.objects.create(author=request.user,
+                                   title=title,
+                                   type=ty,
+                                   category=ca,
+                                   content1="",
+                                   created=current_article.created +
+                                   timedelta(seconds=1.5))
     print("wm : ", wm)
     return JsonResponse({
         'message': '인풋 박스 추가 성공',
@@ -2189,27 +2208,25 @@ def create_input_first(request):
     ca = Category.objects.get(id=category_id)
     title = request.POST['title']
 
-    current_first = MyShortCut.objects.filter(Q(category=category_id) & Q(
-        author=request.user)).order_by("created").first()
-    if(current_first != None):
+    current_first = MyShortCut.objects.filter(
+        Q(category=category_id)
+        & Q(author=request.user)).order_by("created").first()
+    if (current_first != None):
         print("current_first.id : ", current_first.title)
-        wm = MyShortCut.objects.create(
-            author=request.user,
-            title=title,
-            type=ty,
-            category=ca,
-            content1="",
-            created=current_first.created-timedelta(seconds=10)
-        )
+        wm = MyShortCut.objects.create(author=request.user,
+                                       title=title,
+                                       type=ty,
+                                       category=ca,
+                                       content1="",
+                                       created=current_first.created -
+                                       timedelta(seconds=10))
     else:
-        wm = MyShortCut.objects.create(
-            author=request.user,
-            title=title,
-            type=ty,
-            category=ca,
-            content1="",
-            created=timezone.now()
-        )
+        wm = MyShortCut.objects.create(author=request.user,
+                                       title=title,
+                                       type=ty,
+                                       category=ca,
+                                       content1="",
+                                       created=timezone.now())
     return JsonResponse({
         'message': '인풋 박스 추가 성공',
         'shortcut_id': wm.id,
@@ -2227,28 +2244,26 @@ def create_textarea_first(request):
     file_name_before = request.POST['file_name']
     file_name = file_name_before.replace("\\", "/")
 
-    current_first = MyShortCut.objects.filter(Q(category=category_id) & Q(
-        author=request.user)).order_by("created").first()
-    if(current_first != None):
-        wm = MyShortCut.objects.create(
-            author=request.user,
-            title=title,
-            filename=file_name,
-            type=ty,
-            category=ca,
-            created=current_first.created-timedelta(seconds=10),
-            content2=""
-        )
+    current_first = MyShortCut.objects.filter(
+        Q(category=category_id)
+        & Q(author=request.user)).order_by("created").first()
+    if (current_first != None):
+        wm = MyShortCut.objects.create(author=request.user,
+                                       title=title,
+                                       filename=file_name,
+                                       type=ty,
+                                       category=ca,
+                                       created=current_first.created -
+                                       timedelta(seconds=10),
+                                       content2="")
     else:
-        wm = MyShortCut.objects.create(
-            author=request.user,
-            title=title,
-            filename=file_name,
-            type=ty,
-            category=ca,
-            created=timezone.now(),
-            content2=""
-        )
+        wm = MyShortCut.objects.create(author=request.user,
+                                       title=title,
+                                       filename=file_name,
+                                       type=ty,
+                                       category=ca,
+                                       created=timezone.now(),
+                                       content2="")
 
     print("wm : ", wm)
     return JsonResponse({
@@ -2270,30 +2285,28 @@ def create_summernote_first(request):
     file_name_before = request.POST['file_name']
     file_name = file_name_before.replace("\\", "/")
 
-    current_first = MyShortCut.objects.filter(Q(category=category_id) & Q(
-        author=request.user)).order_by("created").first()
-    if(current_first != None):
+    current_first = MyShortCut.objects.filter(
+        Q(category=category_id)
+        & Q(author=request.user)).order_by("created").first()
+    if (current_first != None):
         print("current_first.id : ", current_first.title)
 
-        wm = MyShortCut.objects.create(
-            author=request.user,
-            title=title,
-            filename=file_name,
-            type=ty,
-            category=ca,
-            created=current_first.created-timedelta(seconds=10),
-            content2=""
-        )
+        wm = MyShortCut.objects.create(author=request.user,
+                                       title=title,
+                                       filename=file_name,
+                                       type=ty,
+                                       category=ca,
+                                       created=current_first.created -
+                                       timedelta(seconds=10),
+                                       content2="")
     else:
-        wm = MyShortCut.objects.create(
-            author=request.user,
-            title=title,
-            filename=file_name,
-            type=ty,
-            category=ca,
-            created=timezone.now(),
-            content2=""
-        )
+        wm = MyShortCut.objects.create(author=request.user,
+                                       title=title,
+                                       filename=file_name,
+                                       type=ty,
+                                       category=ca,
+                                       created=timezone.now(),
+                                       content2="")
 
     print("wm : ", wm)
     return JsonResponse({
@@ -2317,15 +2330,13 @@ def create_new2_textarea(request):
 
     print("author : ", author)
 
-    wm = MyShortCut.objects.create(
-        author=request.user,
-        title=title,
-        filename=file_name,
-        type=ty,
-        category=ca,
-        created=datetime.now(),
-        content2=""
-    )
+    wm = MyShortCut.objects.create(author=request.user,
+                                   title=title,
+                                   filename=file_name,
+                                   type=ty,
+                                   category=ca,
+                                   created=datetime.now(),
+                                   content2="")
     print("wm : ", wm)
     return JsonResponse({
         'message': 'textarea 박스 추가 성공',
@@ -2344,18 +2355,19 @@ def create_new2_textarea_between(request, current_article_id):
     print("current_article_time : ", current_article.created)
 
     smae_category_for_current_article = MyShortCut.objects.filter(
-        author=current_article.author, category=current_article.category).order_by("created")
+        author=current_article.author,
+        category=current_article.category).order_by("created")
 
     same_category_id_array = []
 
     for i, p in enumerate(smae_category_for_current_article):
         # print('i',i)
         if (p.created <= current_article.created):
-            MyShortCut.objects.filter(id=p.id).update(
-                created=F('created')+timedelta(seconds=0))
+            MyShortCut.objects.filter(id=p.id).update(created=F('created') +
+                                                      timedelta(seconds=0))
         else:
-            MyShortCut.objects.filter(id=p.id).update(
-                created=F('created')+timedelta(seconds=i+1))
+            MyShortCut.objects.filter(id=p.id).update(created=F('created') +
+                                                      timedelta(seconds=i + 1))
 
     print("create_new2_textarea 실행")
     ty = Type.objects.get(type_name="textarea")
@@ -2363,14 +2375,13 @@ def create_new2_textarea_between(request, current_article_id):
     ca = Category.objects.get(id=category_id)
     title = request.POST['title']
 
-    wm = MyShortCut.objects.create(
-        author=request.user,
-        title=title,
-        type=ty,
-        category=ca,
-        created=current_article.created+timedelta(seconds=1.5),
-        content2=""
-    )
+    wm = MyShortCut.objects.create(author=request.user,
+                                   title=title,
+                                   type=ty,
+                                   category=ca,
+                                   created=current_article.created +
+                                   timedelta(seconds=1.5),
+                                   content2="")
     print("wm : ", wm)
     return JsonResponse({
         'message': 'textarea 박스 추가 성공',
@@ -2386,7 +2397,9 @@ def update_category_by_ajax(request):
 
     for i, sn in enumerate(shortcut_ids):
         MyShortCut.objects.filter(id=sn, author=request.user).update(
-            category=category, created=datetime.now()+timedelta(seconds=i), image=F('image'))
+            category=category,
+            created=datetime.now() + timedelta(seconds=i),
+            image=F('image'))
 
     return redirect('/wm/myshortcut')
 
@@ -2394,8 +2407,8 @@ def update_category_by_ajax(request):
 def delete_myshortcut_by_ajax(request):
     shortcut_ids = request.POST.getlist('shortcut_arr[]')
     if shortcut_ids:
-        MyShortCut.objects.filter(
-            pk__in=shortcut_ids, author=request.user).delete()
+        MyShortCut.objects.filter(pk__in=shortcut_ids,
+                                  author=request.user).delete()
 
     return redirect('/wm/myshortcut')
 
@@ -2410,9 +2423,8 @@ def update_my_shortcut_subject(request):
 
         print('shortcut_subject success : ', shortcut_subject)
 
-        return JsonResponse({
-            'message': 'shortcut_subject update 성공 : ' + shortcut_subject
-        })
+        return JsonResponse(
+            {'message': 'shortcut_subject update 성공 : ' + shortcut_subject})
     else:
         return redirect('/wm/shortcut')
 
@@ -2429,8 +2441,8 @@ def favorite_user_list_for_skillnote(request):
             print("내가 추천한 user_id : ", x.user_id)
             my_favorite.append(x.user_id)
 
-        object_list = User.objects.filter(id__in=my_favorite).order_by(
-            '-profile__skill_note_reputation')
+        object_list = User.objects.filter(
+            id__in=my_favorite).order_by('-profile__skill_note_reputation')
 
         print("object_list : ", object_list)
 
@@ -2456,14 +2468,17 @@ class user_list_for_memo_view(ListView):
         print("query : ", query)
 
         if query != None:
-            object_list = User.objects.all().filter(Q(username__contains=query)
-                                                    ).order_by('-profile__skill_note_reputation')
+            object_list = User.objects.all().filter(
+                Q(username__contains=query)).order_by(
+                    '-profile__skill_note_reputation')
             return object_list
         else:
             print(
-                "user list 출력 확인 ===========================================================")
+                "user list 출력 확인 ==========================================================="
+            )
             object_list = User.objects.all().filter(
-                profile__public="True").order_by('-profile__skill_note_reputation')
+                profile__public="True").order_by(
+                    '-profile__skill_note_reputation')
             print("result : ", object_list)
             return object_list
 
@@ -2477,14 +2492,15 @@ def update_shortcut_nick(request):
         print('update id : ', ca_id)
         print('update field  : ', field)
         print('update value : ', ca_nick_update)
-        cn = CategoryNick.objects.filter(
-            id=ca_id).update(**{field: ca_nick_update})
+        cn = CategoryNick.objects.filter(id=ca_id).update(
+            **{field: ca_nick_update})
         # .update(field = ca_nick_update)
 
         # print('update success : ' , update.id);
 
         return JsonResponse({
-            'message': 'shortcut category nick name update 성공 ' + ca_nick_update,
+            'message':
+            'shortcut category nick name update 성공 ' + ca_nick_update,
         })
     else:
         return redirect('/wm/shortcut')
@@ -2500,14 +2516,15 @@ def update_shortcut_nick2(request):
         print('update field  : ', field)
         print('update value : ', ca_nick_update)
 
-        cn = CategoryNick.objects.filter(
-            id=ca_id).update(**{field: ca_nick_update})
+        cn = CategoryNick.objects.filter(id=ca_id).update(
+            **{field: ca_nick_update})
         # .update(field = ca_nick_update)
 
         # print('update success : ' , update.id);
 
         return JsonResponse({
-            'message': 'shortcut category nick name update 성공 ' + ca_nick_update,
+            'message':
+            'shortcut category nick name update 성공 ' + ca_nick_update,
         })
     else:
         return redirect('/wm/shortcut')
@@ -2518,9 +2535,7 @@ def CategoryNickListByUserId(request, user_name):
         print("user_name : ", user_name)
         user = User.objects.get(username=user_name)
 
-        cn = CategoryNick.objects.get_or_create(
-            author=user,
-        )
+        cn = CategoryNick.objects.get_or_create(author=user, )
         print("cn : ", cn)
 
         cn_my = CategoryNick.objects.get(author=user.id)
@@ -2538,9 +2553,7 @@ def CategoryNickListByUserId_for_user(request, user_name):
         print("user_name : ", user_name)
         user = User.objects.get(username=user_name)
 
-        cn = CategoryNick.objects.get_or_create(
-            author=user,
-        )
+        cn = CategoryNick.objects.get_or_create(author=user, )
         print("cn : ", cn)
 
         cn_my = CategoryNick.objects.get(author=user.id)
@@ -2552,12 +2565,13 @@ def CategoryNickListByUserId_for_user(request, user_name):
             field_name = "ca" + str(i)
             column_list.append(getattr(cn_my, field_name))
 
-        return render(request, 'wm/categorynick_list_for_user.html', {
-            "category": cn_my,
-            "column_list": column_list,
-            "page_user": user_name,
-            "range": range(1, 120)
-        })
+        return render(
+            request, 'wm/categorynick_list_for_user.html', {
+                "category": cn_my,
+                "column_list": column_list,
+                "page_user": user_name,
+                "range": range(1, 120)
+            })
     else:
         return HttpResponse("Request method is not a GET")
 
@@ -2589,7 +2603,11 @@ class update_skilnote_by_summernote(UpdateView):
         print("caid : ", myobj.category.id)
         self.owner_id = myobj.author.username
         self.category_id = myobj.category.id
-        return reverse_lazy('wm:skil_note_list_by_user', kwargs={'user': myobj.author.username, "category_id": myobj.category.id})
+        return reverse_lazy('wm:skil_note_list_by_user',
+                            kwargs={
+                                'user': myobj.author.username,
+                                "category_id": myobj.category.id
+                            })
 
 
 class modify_myshortcut_by_summer_note2(UpdateView):
@@ -2637,10 +2655,7 @@ def update_shorcut_id_for_user(request, id):
             option = user_id + "유저가 없으므로 업데이트를 하지 않았습니다."
             print("유저를 업데이트 하지 않았습니다.")
 
-        return JsonResponse({
-            'message': option,
-            'original_id': original_user
-        })
+        return JsonResponse({'message': option, 'original_id': original_user})
     else:
         return redirect('/todo')
 
@@ -2694,14 +2709,16 @@ class MyShortcutListByCategory(ListView):
         slug = self.kwargs['slug']
         category = Category.objects.get(slug=slug)
         pf = Profile.objects.filter(Q(user=self.request.user)).update(
-            selected_category_id=category.id, last_updated_category=category.id)
+            selected_category_id=category.id,
+            last_updated_category=category.id)
         print('category id update 성공')
 
         user = User.objects.get(Q(username=self.request.user))
 
         print('user : ', user)
 
-        return MyShortCut.objects.filter(category=category, author=user).order_by('created')
+        return MyShortCut.objects.filter(category=category,
+                                         author=user).order_by('created')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         user = User.objects.get(Q(username=self.request.user))
@@ -2742,10 +2759,7 @@ def update_shortcut_ajax(request, id):
     if request.method == "POST" and request.is_ajax():
         todo = MyShortCut.objects.filter(Q(id=id)).update(title=title)
         print('MyShortCut update 성공 id : ', id)
-        return JsonResponse({
-            'message': 'shortcut 업데이트 성공',
-            'title': title
-        })
+        return JsonResponse({'message': 'shortcut 업데이트 성공', 'title': title})
     else:
         return redirect('/todo')
 
@@ -2779,30 +2793,32 @@ class SkilNoteListView(LoginRequiredMixin, ListView):
             print("selected_category_id ::::::::::::: ", selected_category_id)
 
             qs = MyShortCut.objects.filter(
-                Q(author=user, category=selected_category_id)).order_by('created')
+                Q(author=user,
+                  category=selected_category_id)).order_by('created')
             print("SkilNoteListView(qs) ::::::::::::::::", qs)
         except:
             profile = Profile.objects.create(user=self.request.user)
             selected_category_id = self.request.user.profile.selected_category_id
             print("profile 생성 성공 ")
             qs = MyShortCut.objects.filter(
-                Q(author=user, category=selected_category_id)).order_by('created')
+                Q(author=user,
+                  category=selected_category_id)).order_by('created')
         return qs
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        cn = CategoryNick.objects.get_or_create(
-            author=self.request.user,
-        )
+        cn = CategoryNick.objects.get_or_create(author=self.request.user, )
         context = super(SkilNoteListView, self).get_context_data(**kwargs)
         category_list = Category.objects.all()
         # print("category_list ::::::::" , category_list)
 
         if not category_list:
             for num in range(1, 121):
-                filed_name = "ca"+str(num)
-                slug_name = "ca"+str(num)
-                Category.objects.create(
-                    pk=num, name=filed_name, slug=slug_name, author=self.request.user)
+                filed_name = "ca" + str(num)
+                slug_name = "ca" + str(num)
+                Category.objects.create(pk=num,
+                                        name=filed_name,
+                                        slug=slug_name,
+                                        author=self.request.user)
                 print("카테고리 row 생성 성공 ca", num)
                 category_list = Category.objects.all()
         else:
@@ -2819,6 +2835,7 @@ class SkilNoteListView(LoginRequiredMixin, ListView):
 
 class user_list_for_login_page(ListView):
     paginate_by = 20
+
     # if 'q' in request.GET:
     #     query = request.GET.get('q')
     #     print("query : ", query)
@@ -2835,12 +2852,14 @@ class user_list_for_login_page(ListView):
         print("query : ", query)
 
         if query != None:
-            user_list = User.objects.all().filter(Q(username__contains=query)
-                                                  ).order_by('-profile__skill_note_reputation')
+            user_list = User.objects.all().filter(
+                Q(username__contains=query)).order_by(
+                    '-profile__skill_note_reputation')
             return user_list
         else:
             print(
-                "user list 출력 확인 ===========================================================")
+                "user list 출력 확인 ==========================================================="
+            )
             object_list = User.objects.all().filter(
                 profile__public="True").order_by('username')
             print("result : ", object_list)
@@ -2861,10 +2880,14 @@ class search_skil_note_for_me(LoginRequiredMixin, ListView):
             query = ""
 
         print("query ::::::::::::::: ", query)
-        print('검색 결과를 출력합니다 유저는 {} 검색어는 {} 입니다 ################################################'.format(
-            self.request.user, query))
-        qs = MyShortCut.objects.filter(Q(author=self.request.user) & (Q(title__contains=query) | Q(
-            filename__contains=query) | Q(content1__contains=query) | Q(content2__contains=query))).order_by('created')
+        print(
+            '검색 결과를 출력합니다 유저는 {} 검색어는 {} 입니다 ################################################'
+            .format(self.request.user, query))
+        qs = MyShortCut.objects.filter(
+            Q(author=self.request.user)
+            & (Q(title__contains=query) | Q(filename__contains=query)
+               | Q(content1__contains=query)
+               | Q(content2__contains=query))).order_by('created')
         print("qs : ", qs)
         return qs
 
@@ -2889,10 +2912,12 @@ class search_skilnote_by_file_name_for_me(LoginRequiredMixin, ListView):
             query = ""
 
         print("query ::::::::::::::: ", query)
-        print('파일 검색 결과를 출력합니다 유저는 {} 검색어는 {} 입니다 ################################################'.format(
-            self.request.user, query))
-        qs = MyShortCut.objects.filter(Q(author=self.request.user) & Q(
-            filename__contains=query)).order_by('created')
+        print(
+            '파일 검색 결과를 출력합니다 유저는 {} 검색어는 {} 입니다 ################################################'
+            .format(self.request.user, query))
+        qs = MyShortCut.objects.filter(
+            Q(author=self.request.user)
+            & Q(filename__contains=query)).order_by('created')
         print("qs : ", qs)
         return qs
 
@@ -2917,10 +2942,12 @@ class search_skilnote_by_file_name_for_all(LoginRequiredMixin, ListView):
             query = ""
 
         print("query ::::::::::::::: ", query)
-        print('파일 검색 결과를 출력합니다 유저는 all 검색어는 {} 입니다 ################################################'.format(
-            self.request.user, query))
+        print(
+            '파일 검색 결과를 출력합니다 유저는 all 검색어는 {} 입니다 ################################################'
+            .format(self.request.user, query))
         qs = MyShortCut.objects.filter(Q(filename__contains=query)).exclude(
-            Q(filename__isnull=True) | Q(filename__exact='')).order_by('created')
+            Q(filename__isnull=True)
+            | Q(filename__exact='')).order_by('created')
         print("qs : ", qs)
         return qs
 
@@ -2947,8 +2974,10 @@ class search_skil_note_for_all(LoginRequiredMixin, ListView):
 
         print("query ::::::::::::::: ", query)
         print('검색 결과를 출력합니다 유저는 전체 검색어는 {} 입니다 ##'.format(query))
-        qs = MyShortCut.objects.filter(Q(title__contains=query) | Q(filename__contains=query) | Q(
-            content1__contains=query) | Q(content2__contains=query)).order_by('created')
+        qs = MyShortCut.objects.filter(
+            Q(title__contains=query) | Q(filename__contains=query)
+            | Q(content1__contains=query)
+            | Q(content2__contains=query)).order_by('created')
         print("qs : ", qs)
         return qs
 
@@ -2962,6 +2991,7 @@ class search_skil_note_for_all(LoginRequiredMixin, ListView):
 class MyShortCutCreateView_input(LoginRequiredMixin, CreateView):
     model = MyShortCut
     form_class = MyShortCutForm_input
+
     # fields = ['title','content1','category']
 
     def form_valid(self, form):
@@ -2993,7 +3023,8 @@ class SkilNoteCreateView_image_through(LoginRequiredMixin, CreateView):
         print("current_article_time : ", current_article.created)
 
         smae_category_for_current_article = MyShortCut.objects.filter(
-            author=current_article.author, category=current_article.category).order_by("created")
+            author=current_article.author,
+            category=current_article.category).order_by("created")
 
         same_category_id_array = []
 
@@ -3001,17 +3032,17 @@ class SkilNoteCreateView_image_through(LoginRequiredMixin, CreateView):
             # print('i',i)
             if (p.created <= current_article.created):
                 MyShortCut.objects.filter(id=p.id).update(
-                    created=F('created')+timedelta(seconds=0))
+                    created=F('created') + timedelta(seconds=0))
             else:
                 MyShortCut.objects.filter(id=p.id).update(
-                    created=F('created')+timedelta(seconds=i+1))
+                    created=F('created') + timedelta(seconds=i + 1))
 
         print("완료 명단 입력 뷰 실행2")
         ty = Type.objects.get(type_name="image")
         print("ty : ", ty)
         ms = form.save(commit=False)
         ms.author = self.request.user
-        ms.created = current_article.created+timedelta(seconds=1.5)
+        ms.created = current_article.created + timedelta(seconds=1.5)
         ms.type = ty
         category_id = self.request.user.profile.selected_category_id
         ca = Category.objects.get(id=category_id)
@@ -3026,6 +3057,7 @@ class SkilNoteCreateView_image_through(LoginRequiredMixin, CreateView):
 class MyShortCutCreateView_image(LoginRequiredMixin, CreateView):
     model = MyShortCut
     form_class = MyShortCutForm_image
+
     # fields = ['title','content1','category']
 
     def form_valid(self, form):
@@ -3090,7 +3122,8 @@ class CreateSkilNoteBySummerNote(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         category_id = self.request.user.profile.selected_category_id
-        return reverse('wm:my_shortcut_list')+'#shortcut_{}'.format(category_id)
+        return reverse('wm:my_shortcut_list') + '#shortcut_{}'.format(
+            category_id)
 
 
 # 2244
@@ -3130,7 +3163,9 @@ class createSkilNoteForInsertMode(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         category_id = self.request.user.profile.selected_category_id
-        return reverse('wm:my_shortcut_list2')+'#shortcut_{}'.format(category_id)
+        return reverse('wm:my_shortcut_list2') + '#shortcut_{}'.format(
+            category_id)
+
 
 # 2244 0111
 # 0111 작전명:비로그인유저입력 뷰 함수 추가
@@ -3184,7 +3219,11 @@ class InsertForOtherUserNote(LoginRequiredMixin, CreateView):
         # print("self.Kwargs")
         # category_id = self.request.user.profile.selected_category_id
         # # return reverse('wm:skil_note_list_by_user')+'{}'.format(category_id)
-        return reverse('wm:skil_note_list_by_user', kwargs={"user": self.userid, "category_id": self.category_num})
+        return reverse('wm:skil_note_list_by_user',
+                       kwargs={
+                           "user": self.userid,
+                           "category_id": self.category_num
+                       })
         # # return redirect('/some/url/')
 
 
@@ -3194,7 +3233,8 @@ class SkilNoteCreateView_summernote_through2(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         category_id = self.request.user.profile.selected_category_id
-        return reverse('wm:my_shortcut_list2')+'#shortcut_{}'.format(self.object.id)
+        return reverse('wm:my_shortcut_list2') + '#shortcut_{}'.format(
+            self.object.id)
 
     def get_template_names(self):
         return ['wm/myshortcut_summernote_form.html']
@@ -3208,7 +3248,8 @@ class SkilNoteCreateView_summernote_through2(LoginRequiredMixin, CreateView):
         print("current_article_time : ", current_article.created)
 
         smae_category_for_current_article = MyShortCut.objects.filter(
-            author=current_article.author, category=current_article.category).order_by("created")
+            author=current_article.author,
+            category=current_article.category).order_by("created")
 
         same_category_id_array = []
 
@@ -3216,10 +3257,10 @@ class SkilNoteCreateView_summernote_through2(LoginRequiredMixin, CreateView):
             # print('i',i)
             if (p.created <= current_article.created):
                 MyShortCut.objects.filter(id=p.id).update(
-                    created=F('created')+timedelta(seconds=0))
+                    created=F('created') + timedelta(seconds=0))
             else:
                 MyShortCut.objects.filter(id=p.id).update(
-                    created=F('created')+timedelta(seconds=i+1))
+                    created=F('created') + timedelta(seconds=i + 1))
 
         print("same_category_id_array : ", same_category_id_array)
 
@@ -3227,7 +3268,7 @@ class SkilNoteCreateView_summernote_through2(LoginRequiredMixin, CreateView):
 
         ms = form.save(commit=False)
         ms.author = self.request.user
-        ms.created = current_article.created+timedelta(seconds=1.5)
+        ms.created = current_article.created + timedelta(seconds=1.5)
         ms.type = ty
 
         category_id = self.request.user.profile.selected_category_id
@@ -3253,7 +3294,8 @@ class SkilNoteCreateView_summernote_through(LoginRequiredMixin, CreateView):
         print("current_article_time : ", current_article.created)
 
         smae_category_for_current_article = MyShortCut.objects.filter(
-            author=current_article.author, category=current_article.category).order_by("created")
+            author=current_article.author,
+            category=current_article.category).order_by("created")
 
         same_category_id_array = []
 
@@ -3261,10 +3303,10 @@ class SkilNoteCreateView_summernote_through(LoginRequiredMixin, CreateView):
             # print('i',i)
             if (p.created <= current_article.created):
                 MyShortCut.objects.filter(id=p.id).update(
-                    created=F('created')+timedelta(seconds=0))
+                    created=F('created') + timedelta(seconds=0))
             else:
                 MyShortCut.objects.filter(id=p.id).update(
-                    created=F('created')+timedelta(seconds=i+1))
+                    created=F('created') + timedelta(seconds=i + 1))
 
         print("same_category_id_array : ", same_category_id_array)
 
@@ -3272,7 +3314,7 @@ class SkilNoteCreateView_summernote_through(LoginRequiredMixin, CreateView):
 
         ms = form.save(commit=False)
         ms.author = self.request.user
-        ms.created = current_article.created+timedelta(seconds=1.5)
+        ms.created = current_article.created + timedelta(seconds=1.5)
         ms.type = ty
 
         category_id = self.request.user.profile.selected_category_id
